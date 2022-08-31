@@ -3,13 +3,15 @@ package Topology;
 import Graph.*;
 import MovingObjects.Vehicle;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Topo {
     Graph graph;
-    List<Vehicle> vehiclesList;
+    List<Node> vehiclesList;
     GraphDraw topoPanel;
+    Timer routingTimer;     //timer for updating routing table
 
     public GraphDraw getTopoPanel() {
         return topoPanel;
@@ -38,9 +40,9 @@ public class Topo {
         }
     }
 
-    public Vehicle getVehicle(int id){
+    public Node getVehicle(int id){
         if (vehiclesList == null) return null;
-        for (Vehicle v:vehiclesList) {
+        for (Node v:vehiclesList) {
             if (v.getId() == id) return v;
 
         }
@@ -48,28 +50,23 @@ public class Topo {
     }
 
     public void runAllVehicles() {
-        for (Vehicle v: vehiclesList)
+        for (Node node: vehiclesList){
+            Vehicle v = (Vehicle) node;
             if (v.getState() != Vehicle.VehicleState.RUNNING) v.run();
-//            for (Node v: graph.getNodeList())
-//                if (v instanceof Vehicle){
-//                    if (((Vehicle) v).getState()!= Vehicle.VehicleState.RUNNING)
-//                        ((Vehicle) v).run();
-//                }
+        }
 
     }
     public void stopAllVehicles(){
-        for (Vehicle v: vehiclesList)
+        for (Node node: vehiclesList){
+            Vehicle v = (Vehicle) node;
             if (v.getState() == Vehicle.VehicleState.RUNNING) v.stop();
-//        for (Node v: graph.getNodeList())
-//            if (v instanceof Vehicle){
-//                if (((Vehicle) v).getState()== Vehicle.VehicleState.RUNNING)
-//                    ((Vehicle) v).stop();
-//            }
+        }
+
     }
 
     public void putVehicleToNode(int vehicleId, int nodeId){
         if (graph == null) return;
-        Vehicle vehicle = getVehicle(vehicleId);
+        Vehicle vehicle = (Vehicle) getVehicle(vehicleId);
         if (vehicle == null) return;
         Node node = graph.getNode(nodeId);
         if (node == null) return;
@@ -77,7 +74,7 @@ public class Topo {
     }
     public void putVehicleToEdge(int vehicleId, int edgeId, double relativePos){
         if (graph == null) return;
-        Vehicle vehicle = getVehicle(vehicleId);
+        Vehicle vehicle = (Vehicle) getVehicle(vehicleId);
         if (vehicle == null) return;
         Edge edge = graph.getEdge(edgeId);
         if (edge == null) return;
@@ -95,8 +92,32 @@ public class Topo {
         runAllVehicles();
         //topoPanel.run();
     }
+
+    public List<Node> getVehiclesList() {
+        return vehiclesList;
+    }
+
+    public void setVehiclesList(List<Node> vehiclesList) {
+        this.vehiclesList = vehiclesList;
+    }
+
     public void stop(){
         stopAllVehicles();
         //topoPanel.stop();
+    }
+    public void startUpdatingRoutingTable(){
+        if (routingTimer == null){
+            routingTimer = new Timer(50, e -> {
+                for (Node node:vehiclesList){
+                    Vehicle v = (Vehicle) node;
+                    v.updateRoutingTable(this);
+                }
+            });
+        }
+        routingTimer.start();
+    }
+    public void stopUpdatingRoutingTable(){
+        if (routingTimer != null)
+            routingTimer.stop();
     }
 }

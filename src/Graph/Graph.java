@@ -9,7 +9,7 @@ public class Graph {
     List<Node> nodeList = new ArrayList<Node>();
     //List<Vehicle> vehicleList;
     List<Edge> edgeList = new ArrayList<Edge>();
-    double scale;  //number of metres per point
+    static double scale = 10;  //number of metres per point
     //double scaleY;
 
     public Graph(int numberOfNodes) {
@@ -19,7 +19,7 @@ public class Graph {
             else node = new RectangleNode(i);
             nodeList.add(node);
         }
-        scale = 100;
+        //scale = 100;
 
     }
 
@@ -33,15 +33,15 @@ public class Graph {
         for (int i = 1; i <= numberOfEdges; i++) {
             edgeList.add(new LineEdge(i));
         }
-        scale = 100;
+        //scale = 100;
     }
 
-    public double getScale() {
+    public static double getScale() {
         return scale;
     }
 
-    public void setScale(double scale) {
-        this.scale = scale;
+    public static void setScale(double scale) {
+        scale = scale;
     }
 
         public Node getNode(int id) {

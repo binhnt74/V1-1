@@ -7,7 +7,10 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import java.awt.*;
+
 import Graph.Constants.MOVING_DIRECTION;
+import Routing.RoutingTable;
+import Topology.Topo;
 
 import java.util.Random;
 import javax.swing.Timer;
@@ -15,26 +18,27 @@ import java.util.TimerTask;
 
 public class Vehicle extends Node {
     VehicleState state;
-    final double SPEED_UNIT = 1;
-    double speed;
+    double speed_unit = 1.0D;  //set to 0 for speed 0
+    double speed;   //internal speed
+    double realSpeed;   //used to setup from user's point of view
     double currentMovingAngle;
 
     MOVING_DIRECTION currentDirection;
     double width = 20;
-
-    public MOVING_DIRECTION getCurrentDirection() {
-        return currentDirection;
-    }
-
-    public void setCurrentDirection(MOVING_DIRECTION currentDirection) {
-        this.currentDirection = currentDirection;
-    }
-
     int height = 15;
     Edge currentContainingEdge; //current edge that contains this node
     //Timer timer = null;
-    javax.swing.Timer timer2;
-    //RunningTask runningTask;
+    Timer timer2;   //timer for running vehicle
+
+    RoutingTable rtTable;   //routing table for this vehicle
+
+    public RoutingTable getRtTable() {
+        return rtTable;
+    }
+
+    public void setRtTable(RoutingTable rtTable) {
+        this.rtTable = rtTable;
+    }
 
     public Vehicle(int id) {
         super(id);
@@ -45,6 +49,15 @@ public class Vehicle extends Node {
         super(id, x, y);
         commonInit();
     }
+    //RunningTask runningTask;
+
+    public MOVING_DIRECTION getCurrentDirection() {
+        return currentDirection;
+    }
+
+    public void setCurrentDirection(MOVING_DIRECTION currentDirection) {
+        this.currentDirection = currentDirection;
+    }
 
     public double getSpeed() {
         return speed;
@@ -52,6 +65,20 @@ public class Vehicle extends Node {
 
     public void setSpeed(double speed) {
         this.speed = speed;
+        realSpeed = 1000 * Graph.getScale() * speed / Constants.TIMESLOT;
+        if (speed == 0) speed_unit = 0D;
+        else if (speed_unit == 0) speed_unit = 1D;
+    }
+
+    public double getRealSpeed() {
+        return realSpeed;
+    }
+
+    public void setRealSpeed(double realSpeed) {
+        this.realSpeed = realSpeed;
+        speed = Constants.TIMESLOT * realSpeed / 1000 / Graph.getScale();
+        if (speed == 0) speed_unit = 0D;
+        else if (speed_unit == 0) speed_unit = 1D;
     }
 
     void commonInit() {
@@ -112,17 +139,17 @@ public class Vehicle extends Node {
 //        timer.schedule(runningTask, 1, ((int)(100/velocity)));
 
         if (timer2 == null)
-            timer2 = new Timer((int)(Constants.TIMESLOT/ speed), e -> {
+            timer2 = new Timer((int) (Constants.TIMESLOT / speed), e -> {
                 //revalidate();
                 runVehicle();
             });
         timer2.start();
     }
 
-    Edge findAvailableEdge(Edge currentEdge, List<Edge> eList){
+    Edge findAvailableEdge(Edge currentEdge, List<Edge> eList) {
         int n = eList.size();
-        if (n==0) return null;
-        else if (n==1) return eList.get(0);
+        if (n == 0) return null;
+        else if (n == 1) return eList.get(0);
         else {
 
 //                int i=0;
@@ -151,26 +178,7 @@ public class Vehicle extends Node {
         }
         //if (state == VehicleState.PAUSED || state == VehicleState.STOPPED) return;
 
-//        int dx = 0, dy = 0;
-//
-//        //currentAngle = ((LineEdge) edge).getAngle();
-//
-//        if (currentMovingAngle == Math.PI / 2) {
-//            dy = -(int) speedUnit;
-//        } else if (currentMovingAngle == -Math.PI / 2) {
-//            dy = (int) speedUnit;
-//        } else if (currentMovingAngle == 0D) {
-//            dx = (int) speedUnit;
-//        } else if (currentMovingAngle == Math.PI) {
-//            dx = -(int) speedUnit;
-//        } else {
-//            dy = -(int) (speedUnit * Math.sin(currentMovingAngle));
-//            dx = - (int) (speedUnit * Math.cos(currentMovingAngle));
-//        }
-
-//        setX(getX() + dx);
-//        setY(getY() + dy);
-        Point2D nextPoint = edge.nextStep(getX(), getY(), currentDirection, SPEED_UNIT);
+        Point2D nextPoint = edge.nextStep(getX(), getY(), currentDirection, speed_unit);
         Node nextNode;
         if (currentDirection == MOVING_DIRECTION.RIGHT)
             nextNode = edge.getDest();
@@ -198,7 +206,7 @@ public class Vehicle extends Node {
             //System.out.println("No new ways to go");
             if (edge.getEdgeType() == EdgeType.UNDIRECTED) {
                 //currentMovingAngle = Math.PI - currentMovingAngle;
-                if (currentDirection==MOVING_DIRECTION.RIGHT)
+                if (currentDirection == MOVING_DIRECTION.RIGHT)
                     currentDirection = MOVING_DIRECTION.OPPOSITE;
                 else
                     currentDirection = MOVING_DIRECTION.RIGHT;
@@ -216,38 +224,36 @@ public class Vehicle extends Node {
             if (newEdge == edge) {//return to the old edge
                 if (edge.getEdgeType() == EdgeType.UNDIRECTED) {
                     //currentMovingAngle = Math.PI - currentMovingAngle;
-                    if (currentDirection==MOVING_DIRECTION.RIGHT)
+                    if (currentDirection == MOVING_DIRECTION.RIGHT)
                         currentDirection = MOVING_DIRECTION.OPPOSITE;
                     else
                         currentDirection = MOVING_DIRECTION.RIGHT;
                 }
             } else {
                 setCurrentContainingEdge(newEdge);
-                //if (newEdge instanceof LineEdge) {
-                    //newEdge = (LineEdge) newEdge;
-                    double angle = ((LineEdge) newEdge).getAngle();
-                    if (nextNode == newEdge.getSource()) {
-                        //currentMovingAngle = angle;
-                        currentDirection = MOVING_DIRECTION.RIGHT;
-                    }
-                    //setCurrentMovingAngle(((LineEdge) newEdge).getAngle());
-                    else {
-                        //currentMovingAngle = -angle;
-                        currentDirection = MOVING_DIRECTION.OPPOSITE;
-                    }
-                    //System.out.println("Current angle " + getCurrentMovingAngle());
-//                } else
-//                    currentMovingAngle = 0D;
+
+                double angle = ((LineEdge) newEdge).getAngle();
+                if (nextNode == newEdge.getSource()) {
+                    //currentMovingAngle = angle;
+                    currentDirection = MOVING_DIRECTION.RIGHT;
+                }
+                //setCurrentMovingAngle(((LineEdge) newEdge).getAngle());
+                else {
+                    //currentMovingAngle = -angle;
+                    currentDirection = MOVING_DIRECTION.OPPOSITE;
+                }
+
             }
 //                    System.out.println("Moving angle "+currentMovingAngle);
         }
-    //}
+        //}
     }
 
-    public void reSchedule(double velocity){
+    public void reSchedule(double velocity) {
         //timer.cancel();
         //timer.schedule(runningTask, 1, ((int)(100/velocity)));
     }
+
     public void stop() {
 //        if (timer != null)
 //            timer.cancel();
@@ -266,25 +272,23 @@ public class Vehicle extends Node {
     public void draw() {
         double m = Math.min(width, height) / 2;
         graphics.setColor(getBackgroundColor());
-        graphics.fillOval((int)(getX() - m), (int)(getY() - m), (int)(m - 1), (int)(m - 1));
-        graphics.fillOval((int)getX() + 1, (int)(getY() - m), (int)(m - 1), (int)(m - 1));
-        graphics.fillOval((int)(getX() - m), (int)(getY() + 1), (int)(m - 1), (int)(m - 1));
-        graphics.fillOval((int)(getX() + 1), (int)(getY() + 1), (int)(m - 1), (int)(m - 1));
+        graphics.fillOval((int) (getX() - m), (int) (getY() - m), (int) (m - 1), (int) (m - 1));
+        graphics.fillOval((int) getX() + 1, (int) (getY() - m), (int) (m - 1), (int) (m - 1));
+        graphics.fillOval((int) (getX() - m), (int) (getY() + 1), (int) (m - 1), (int) (m - 1));
+        graphics.fillOval((int) (getX() + 1), (int) (getY() + 1), (int) (m - 1), (int) (m - 1));
         graphics.setColor(Color.RED);
-        graphics.fillOval((int)(getX() - 3), (int)(getY() - 3), 6, 6);
+        graphics.fillOval((int) (getX() - 3), (int) (getY() - 3), 6, 6);
 
         Font font = graphics.getFont();
         int fsize = font.getSize();
         String st = String.valueOf(getId());
         graphics.setColor(getFrontColor());
-        graphics.drawString(st, ((int)getX()) - fsize * st.length() / 4, ((int)getY()) + fsize / 2);
+        graphics.drawString(st, ((int) getX()) - fsize * st.length() / 4, ((int) getY()) + fsize / 2);
         graphics.draw(new Rectangle2D.Double(getX() - width / 2, getY() - height / 2, width, height));
 
     }
 
     //Put this vehicle to the position of node
-
-
 
 
     Vehicle returnMe() {
@@ -295,10 +299,10 @@ public class Vehicle extends Node {
 
     class RunningTask extends TimerTask {
         //Find an edge in eList that would be different to currentEdge
-        Edge findAvailableEdge(Edge currentEdge, List<Edge> eList){
+        Edge findAvailableEdge(Edge currentEdge, List<Edge> eList) {
             int n = eList.size();
-            if (n==0) return null;
-            else if (n==1) return eList.get(0);
+            if (n == 0) return null;
+            else if (n == 1) return eList.get(0);
             else {
 
 //                int i=0;
@@ -307,12 +311,13 @@ public class Vehicle extends Node {
 //                }
 //                if (i<n) return eList.get(i);
 //                else {
-                    Random rand = new Random();
-                    return eList.get(rand.nextInt(n));
+                Random rand = new Random();
+                return eList.get(rand.nextInt(n));
 //                }
             }
 
         }
+
         @Override
         public void run() {
             //double currentAngle = 0;
@@ -332,16 +337,16 @@ public class Vehicle extends Node {
             //currentAngle = ((LineEdge) edge).getAngle();
 
             if (currentMovingAngle == Math.PI / 2) {
-                dy = -(int) SPEED_UNIT;
+                dy = -(int) speed_unit;
             } else if (currentMovingAngle == -Math.PI / 2) {
-                dy = (int) SPEED_UNIT;
+                dy = (int) speed_unit;
             } else if (currentMovingAngle == 0D) {
-                dx = (int) SPEED_UNIT;
+                dx = (int) speed_unit;
             } else if (currentMovingAngle == Math.PI) {
-                dx = -(int) SPEED_UNIT;
+                dx = -(int) speed_unit;
             } else {
-                dy = -(int) (SPEED_UNIT * Math.sin(currentMovingAngle));
-                dx = - (int) (SPEED_UNIT * Math.cos(currentMovingAngle));
+                dy = -(int) (speed_unit * Math.sin(currentMovingAngle));
+                dx = -(int) (speed_unit * Math.cos(currentMovingAngle));
             }
             setX(getX() + dx);
             setY(getY() + dy);
@@ -352,7 +357,7 @@ public class Vehicle extends Node {
                 if (!newNode.coincides(returnMe())) newNode = edge.getSource();
                 putTo(newNode);
                 Graph curGraph = getCurrentGraph();
-                if (curGraph==null) return;
+                if (curGraph == null) return;
                 List<Edge> eList = getCurrentGraph().getAdjacentEdges(newNode);
                 //System.out.println("New node found " + newNode.getId());
 
@@ -381,13 +386,12 @@ public class Vehicle extends Node {
                         if (newEdge instanceof LineEdge) {
                             //newEdge = (LineEdge) newEdge;
                             double angle = ((LineEdge) newEdge).getAngle();
-                            if (newNode == newEdge.getSource())
-                            {
+                            if (newNode == newEdge.getSource()) {
                                 currentMovingAngle = angle;
                             }
-                                //setCurrentMovingAngle(((LineEdge) newEdge).getAngle());
+                            //setCurrentMovingAngle(((LineEdge) newEdge).getAngle());
                             else {
-                                currentMovingAngle = - angle;
+                                currentMovingAngle = -angle;
                             }
                             //System.out.println("Current angle " + getCurrentMovingAngle());
                         } else
@@ -398,4 +402,14 @@ public class Vehicle extends Node {
             }
         }
     }
+    //update routing table from this topo
+    public void updateRoutingTable(Topo topo){
+        if (rtTable == null){
+            rtTable = new RoutingTable();
+            rtTable.setGraph(topo.getGraph());
+            rtTable.setContainer(this);
+        }
+        rtTable.updateRoutingTable(topo.getVehiclesList());
+    }
+
 }

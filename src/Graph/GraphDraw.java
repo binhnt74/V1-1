@@ -16,13 +16,13 @@ public class GraphDraw extends JPanel {
     Timer timer;
     UpdateTask updateTask;
     Window mainWind;
-    java.util.List<Vehicle> vehicleList;
+    java.util.List<Node> vehicleList;
 
-    public java.util.List<Vehicle> getVehicleList() {
+    public java.util.List<Node> getVehicleList() {
         return vehicleList;
     }
 
-    public void setVehicleList(java.util.List<Vehicle> vehicleList) {
+    public void setVehicleList(java.util.List<Node> vehicleList) {
         this.vehicleList = vehicleList;
     }
 
@@ -59,10 +59,7 @@ public class GraphDraw extends JPanel {
 
     public void paint(Graphics g) {
         super.paint(g);
-        //if (graphics == null)
-        //setGraphics((Graphics2D) g);
-        //System.out.println("Paint called");
-        //if (graphics != null)
+
         draw(g);
     }
 
@@ -92,7 +89,7 @@ public class GraphDraw extends JPanel {
             nd.draw();
         }
         if (vehicleList == null) return;
-        for (Vehicle nd : vehicleList) {
+        for (Node nd : vehicleList) {
             nd.draw();
         }
 
@@ -171,10 +168,7 @@ public class GraphDraw extends JPanel {
 //        if (timer!=null){
 //            timer.cancel();
 //        }
-        if (timer2 == null) {
-            //System.out.println("Timer 2 is null, stopping");
-            return;
-        }
+        if (timer2 != null)
         timer2.stop();
     }
 

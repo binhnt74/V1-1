@@ -207,13 +207,19 @@ public class TopoFactory {
             //addVehicle(v[i]);
             //graph.addNode(v[i]);
         }
-
-        for (int i = 0; i < 5; i++) {
-            v[i].setSpeed(10);
-            v[5+i].setSpeed(50);
-            v[10+i].setSpeed(100);
-            //v[30+i].setSpeed(200);
+        for (int i = 0; i < 10; i++) {
+            v[i].setRealSpeed(0);
         }
+
+        for (int i = 10; i < N-10; i++) {
+            v[i].setRealSpeed(14);  //speed 14m/s ~ 50km/s
+
+        }
+        v[N-8].setRealSpeed(28);    //speed 28m/s ~ 100km/s
+
+        v[N-7].setRealSpeed(35);    //speed 35m/s ~ 150km/s
+
+        v[N-7].setRealSpeed(56);    //speed 56m/s ~ 200km/s
 
         int k = 4;
         RSUNode rsuNodes[] = new RSUNode[k];
