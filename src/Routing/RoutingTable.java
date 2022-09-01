@@ -14,16 +14,17 @@ public class RoutingTable {
     HashMap<Integer, Node> nearVehicleList;  //this stores pairs of vehicle id and the vehicle itself
     double range;   //range of this routing table to check near vehicles
 
+    public RoutingTable(){
+        nearVehicleList = new HashMap<>();
+        range = 500;   //metre
+    }
+
     public Graph getGraph() {
         return graph;
     }
 
     public void setGraph(Graph graph) {
         this.graph = graph;
-    }
-
-    public RoutingTable(){
-        nearVehicleList = new HashMap<>();
     }
 
     public Node getContainer() {
@@ -54,6 +55,8 @@ public class RoutingTable {
             System.out.println("The graph is null, this should be initialized");
             return false;
         }
+        if (container == null) return false;
+        if (container == node) return false;
         if (graph.distance(container, node)<= range) return true;
         else return false;
     }
@@ -66,9 +69,15 @@ public class RoutingTable {
         if (nodeList == null) return;
         for (Node node: nodeList){
             //Adding new near vehicles
-            if (!nearVehicleList.containsKey(node.getId()) && isNear(node)) addVehicle(node);
+            if (!nearVehicleList.containsKey(node.getId()) && isNear(node)) {
+                addVehicle(node);
+                System.out.println("Vehicle " + node.getId() + " detected in range");
+            }
             //Removing out-of-range vehicles
-            if (nearVehicleList.containsKey(node.getId()) && !isNear(node)) removeVehicle(node.getId());
+            if (nearVehicleList.containsKey(node.getId()) && !isNear(node)) {
+                removeVehicle(node.getId());
+                System.out.println("    Vehicle " + node.getId() + " moved out of range");
+            }
         }
     }
     public int getNumberOfNearVehicles(){

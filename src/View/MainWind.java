@@ -21,13 +21,13 @@ public class MainWind extends JFrame {
             if (!runningState){
                 urbanTopo.run();
                 runningState = true;
-                startStopBut.setText("Stop");
+                startStopBut.setText("Stop running vehicles");
             }
             else
             {
                 urbanTopo.stop();
                 runningState = false;
-                startStopBut.setText("Start");
+                startStopBut.setText("Start running vehicles");
             }
 
         });
@@ -52,11 +52,15 @@ public class MainWind extends JFrame {
         add(buttonPanel,BorderLayout.EAST);
         buttonPanel.add(startStopBut);
         //buttonPanel.add(Box.createVerticalGlue());
-        Component space = Box.createRigidArea(new Dimension(0,10));
-        buttonPanel.add(space);
+        Component space1 = Box.createRigidArea(new Dimension(0,10));
+        buttonPanel.add(space1);
         buttonPanel.add(routingBut);
-        buttonPanel.add(space);
+        Component space2 = Box.createRigidArea(new Dimension(0,10));
+        buttonPanel.add(space2);
         JButton exitBut = new JButton("Exit");
+        exitBut.addActionListener(e -> {
+            System.exit(0);
+        });
         buttonPanel.add(exitBut);
 
         //panel.add(graphPanel, BorderLayout.CENTER);

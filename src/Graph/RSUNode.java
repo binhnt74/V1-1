@@ -2,7 +2,9 @@ package Graph;
 
 import java.awt.*;
 
-public class RSUNode extends OvalNode{
+public class RSUNode extends NodeWithRoutingTable{
+    double width;
+    double height;
 
     public RSUNode(int id) {
         super(id);
@@ -35,6 +37,13 @@ public class RSUNode extends OvalNode{
         String st = "RSU " + String.valueOf(getId());
         graphics.setColor(frontColor);
         graphics.drawString(st,((int)getX() ) - fsize * st.length() / 4, ((int)getY()) + fsize / 2);
+
+        if (getRtTable()!=null){
+            //System.out.println("Drawing range circle");
+            graphics.setColor(Color.RED);
+            int vRange = (int)(getRtTable().getRange()/Graph.getScale());
+            graphics.drawOval((int)getX()-vRange,(int)getY()-vRange, 2*vRange, 2*vRange);
+        }
 
     }
 }

@@ -16,7 +16,7 @@ import java.util.Random;
 import javax.swing.Timer;
 import java.util.TimerTask;
 
-public class Vehicle extends Node {
+public class Vehicle extends NodeWithRoutingTable {
     VehicleState state;
     double speed_unit = 1.0D;  //set to 0 for speed 0
     double speed;   //internal speed
@@ -30,15 +30,9 @@ public class Vehicle extends Node {
     //Timer timer = null;
     Timer timer2;   //timer for running vehicle
 
-    RoutingTable rtTable;   //routing table for this vehicle
+    //RoutingTable rtTable;   //routing table for this vehicle
 
-    public RoutingTable getRtTable() {
-        return rtTable;
-    }
 
-    public void setRtTable(RoutingTable rtTable) {
-        this.rtTable = rtTable;
-    }
 
     public Vehicle(int id) {
         super(id);
@@ -70,10 +64,12 @@ public class Vehicle extends Node {
         else if (speed_unit == 0) speed_unit = 1D;
     }
 
+    //unit metre/second
     public double getRealSpeed() {
         return realSpeed;
     }
 
+    //unit metre/second
     public void setRealSpeed(double realSpeed) {
         this.realSpeed = realSpeed;
         speed = Constants.TIMESLOT * realSpeed / 1000 / Graph.getScale();
@@ -249,11 +245,6 @@ public class Vehicle extends Node {
         //}
     }
 
-    public void reSchedule(double velocity) {
-        //timer.cancel();
-        //timer.schedule(runningTask, 1, ((int)(100/velocity)));
-    }
-
     public void stop() {
 //        if (timer != null)
 //            timer.cancel();
@@ -262,11 +253,11 @@ public class Vehicle extends Node {
     }
 
     public void speedUp(double up) {
-        speed *= up;
+        realSpeed *= up;
     }
 
     public void speedDown(double down) {
-        speed /= down;
+        realSpeed /= down;
     }
 
     public void draw() {
@@ -286,6 +277,13 @@ public class Vehicle extends Node {
         graphics.drawString(st, ((int) getX()) - fsize * st.length() / 4, ((int) getY()) + fsize / 2);
         graphics.draw(new Rectangle2D.Double(getX() - width / 2, getY() - height / 2, width, height));
 
+        if (getRtTable()!=null){
+            //System.out.println("Drawing range circle");
+            graphics.setColor(Color.RED);
+            int vRange = (int)(getRtTable().getRange()/Graph.getScale());
+            graphics.drawOval((int)getX()-vRange,(int)getY()-vRange, 2*vRange, 2*vRange);
+        }
+
     }
 
     //Put this vehicle to the position of node
@@ -297,119 +295,7 @@ public class Vehicle extends Node {
 
     public enum VehicleState {STARTED, RUNNING, PAUSED, STOPPED}
 
-    class RunningTask extends TimerTask {
-        //Find an edge in eList that would be different to currentEdge
-        Edge findAvailableEdge(Edge currentEdge, List<Edge> eList) {
-            int n = eList.size();
-            if (n == 0) return null;
-            else if (n == 1) return eList.get(0);
-            else {
-
-//                int i=0;
-//                while (i<n && ((LineEdge)eList.get(i)).getAngle() != -Math.PI/2) {
-//                    i++;
-//                }
-//                if (i<n) return eList.get(i);
-//                else {
-                Random rand = new Random();
-                return eList.get(rand.nextInt(n));
-//                }
-            }
-
-        }
-
-        @Override
-        public void run() {
-            //double currentAngle = 0;
-            Edge edge = getCurrentContainingEdge();
-            if (edge == null) return;
-            if (!(edge instanceof LineEdge)) return;
-            edge = (LineEdge) edge;
-
-            if (state == VehicleState.STARTED) {
-                currentMovingAngle = ((LineEdge) edge).getAngle();
-                setState(VehicleState.RUNNING);
-            }
-            if (state == VehicleState.PAUSED || state == VehicleState.STOPPED) return;
-
-            int dx = 0, dy = 0;
-
-            //currentAngle = ((LineEdge) edge).getAngle();
-
-            if (currentMovingAngle == Math.PI / 2) {
-                dy = -(int) speed_unit;
-            } else if (currentMovingAngle == -Math.PI / 2) {
-                dy = (int) speed_unit;
-            } else if (currentMovingAngle == 0D) {
-                dx = (int) speed_unit;
-            } else if (currentMovingAngle == Math.PI) {
-                dx = -(int) speed_unit;
-            } else {
-                dy = -(int) (speed_unit * Math.sin(currentMovingAngle));
-                dx = -(int) (speed_unit * Math.cos(currentMovingAngle));
-            }
-            setX(getX() + dx);
-            setY(getY() + dy);
-            if (!edge.contains(returnMe())) {//if this node doest not belong to the current edge any more
-                //System.out.println("Vehicle is out of current edge");
-
-                Node newNode = edge.getDest();
-                if (!newNode.coincides(returnMe())) newNode = edge.getSource();
-                putTo(newNode);
-                Graph curGraph = getCurrentGraph();
-                if (curGraph == null) return;
-                List<Edge> eList = getCurrentGraph().getAdjacentEdges(newNode);
-                //System.out.println("New node found " + newNode.getId());
-
-                if (eList.size() == 0) return;
-                else if (eList.size() == 1) {//return to the old edge
-                    //System.out.println("No new ways to go");
-                    if (edge.getEdgeType() == EdgeType.UNDIRECTED) {
-                        currentMovingAngle = Math.PI - currentMovingAngle;
-                    } else {//Out of running edges, stop
-                        setState(VehicleState.STOPPED);
-//                        if (timer != null)
-//                            timer.cancel();
-                    }
-                } else {
-                    //System.out.println("Found " + (edgeList.size() - 1) + " another ways");
-//
-                    Edge newEdge = findAvailableEdge(edge, eList);
-                    if (newEdge == null) return;
-//                    System.out.println("Following edge " + newEdge.getId());
-                    if (newEdge == edge) {//return to the old edge
-                        if (edge.getEdgeType() == EdgeType.UNDIRECTED) {
-                            currentMovingAngle = Math.PI - currentMovingAngle;
-                        }
-                    } else {
-                        setCurrentContainingEdge(newEdge);
-                        if (newEdge instanceof LineEdge) {
-                            //newEdge = (LineEdge) newEdge;
-                            double angle = ((LineEdge) newEdge).getAngle();
-                            if (newNode == newEdge.getSource()) {
-                                currentMovingAngle = angle;
-                            }
-                            //setCurrentMovingAngle(((LineEdge) newEdge).getAngle());
-                            else {
-                                currentMovingAngle = -angle;
-                            }
-                            //System.out.println("Current angle " + getCurrentMovingAngle());
-                        } else
-                            currentMovingAngle = 0D;
-                    }
-//                    System.out.println("Moving angle "+currentMovingAngle);
-                }
-            }
-        }
-    }
     //update routing table from this topo
-    public void updateRoutingTable(Topo topo){
-        if (rtTable == null){
-            rtTable = new RoutingTable();
-            rtTable.setGraph(topo.getGraph());
-            rtTable.setContainer(this);
-        }
-        rtTable.updateRoutingTable(topo.getVehiclesList());
-    }
+
 
 }

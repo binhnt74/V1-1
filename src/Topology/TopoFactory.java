@@ -183,7 +183,7 @@ public class TopoFactory {
 //        edge.setDest(graph.getNode(18));
 //        graph.addEdge(edge);
 
-        int N = 50;
+        int N = 10;
         Vehicle v[] = new Vehicle[N];
 
         for (int i = 0; i < N; i++) {
@@ -193,13 +193,13 @@ public class TopoFactory {
             //v[i].setId(200+i);
         }
 
-        v[0].putTo(graph.getEdge(41),0.2);
-        v[0].setCurrentContainingEdge(graph.getEdge(41));
+//        v[0].putTo(graph.getEdge(41),0.2);
+//        v[0].setCurrentContainingEdge(graph.getEdge(41));
 
         //v5.setSpeed(2*v5.getSpeed());
         //v[0].run();
 
-        for (int i = 1; i < N; i++) {
+        for (int i = 0; i < N; i++) {
             Random rand = new Random();
             int eNumber = 1+rand.nextInt(40);
             v[i].putTo(graph.getEdge(eNumber),0.5);
@@ -207,19 +207,33 @@ public class TopoFactory {
             //addVehicle(v[i]);
             //graph.addNode(v[i]);
         }
-        for (int i = 0; i < 10; i++) {
-            v[i].setRealSpeed(0);
+        for (int i = 0; i < N/3; i++) {
+            v[i].setRealSpeed(14);  //14m/s ~ 50km/h
         }
-
-        for (int i = 10; i < N-10; i++) {
-            v[i].setRealSpeed(14);  //speed 14m/s ~ 50km/s
-
+        for (int i = N/3; i < 2*N/3; i++) {
+            v[i].setRealSpeed(28);  //28m/s ~ 100km/h
         }
-        v[N-8].setRealSpeed(28);    //speed 28m/s ~ 100km/s
+        for (int i = 2*N/3; i < N; i++) {
+            v[i].setRealSpeed(56);  //56m/s ~ 200km/h
+        }
+        v[0].putTo(graph.getNode(1));
+        v[0].setCurrentContainingEdge(graph.getEdge(21));
 
-        v[N-7].setRealSpeed(35);    //speed 35m/s ~ 150km/s
+        v[3].putTo(graph.getNode(2));
+        v[3].setCurrentContainingEdge(graph.getEdge(25));
 
-        v[N-7].setRealSpeed(56);    //speed 56m/s ~ 200km/s
+        v[7].putTo(graph.getNode(3));
+        v[7].setCurrentContainingEdge(graph.getEdge(29));
+
+//        for (int i = 10; i < N-10; i++) {
+//            v[i].setRealSpeed(14);  //speed 14m/s ~ 50km/s
+//
+//        }
+//        v[N-8].setRealSpeed(28);    //speed 28m/s ~ 100km/s
+//
+//        v[N-7].setRealSpeed(35);    //speed 35m/s ~ 150km/s
+//
+//        v[N-7].setRealSpeed(56);    //speed 56m/s ~ 200km/s
 
         int k = 4;
         RSUNode rsuNodes[] = new RSUNode[k];

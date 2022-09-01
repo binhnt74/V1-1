@@ -10,6 +10,7 @@ import java.util.List;
 public class Topo {
     Graph graph;
     List<Node> vehiclesList;
+    List<Node> RSUList;
     GraphDraw topoPanel;
     Timer routingTimer;     //timer for updating routing table
 
@@ -49,6 +50,13 @@ public class Topo {
         return null;
     }
 
+    public void updateRSUList(){
+        if (RSUList == null) RSUList = new ArrayList<>();
+        for(Node node: graph.getNodeList()){
+            if (node instanceof RSUNode) RSUList.add(node);
+        }
+    }
+
     public void runAllVehicles() {
         for (Node node: vehiclesList){
             Vehicle v = (Vehicle) node;
@@ -84,6 +92,7 @@ public class Topo {
         if (graph == null) return;
         topoPanel.setGraph(graph);
         topoPanel.setVehicleList(vehiclesList);
+        updateRSUList();
         topoPanel.run();
         //topoPanel.draw(topoPanel.getGraphics(),vehiclesList);
         //topoPanel.repaint();
@@ -110,6 +119,10 @@ public class Topo {
             routingTimer = new Timer(50, e -> {
                 for (Node node:vehiclesList){
                     Vehicle v = (Vehicle) node;
+                    v.updateRoutingTable(this);
+                }
+                for (Node node:RSUList){
+                    RSUNode v = (RSUNode) node;
                     v.updateRoutingTable(this);
                 }
             });
