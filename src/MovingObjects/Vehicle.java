@@ -4,19 +4,24 @@ import Graph.*;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Collection;
 import java.util.List;
 
 import java.awt.*;
 
 import Graph.Constants.MOVING_DIRECTION;
+import Request.Request;
+import Request.RequestFactory;
+import Request.Broker;
 import Routing.RoutingTable;
 import Topology.Topo;
 
 import java.util.Random;
 import javax.swing.Timer;
-import java.util.TimerTask;
+//import java.util.TimerTask;
 
 public class Vehicle extends NodeWithRoutingTable {
+    public enum VehicleState {STARTED, RUNNING, PAUSED, STOPPED}
     VehicleState state;
     double speed_unit = 1.0D;  //set to 0 for speed 0
     double speed;   //internal speed
@@ -30,9 +35,9 @@ public class Vehicle extends NodeWithRoutingTable {
     //Timer timer = null;
     Timer timer2;   //timer for running vehicle
 
-    //RoutingTable rtTable;   //routing table for this vehicle
-
-
+    List<Request> requestList;
+    //Timer requestTimer; //timer for creating new requests
+    RequestFactory requestFactory;
 
     public Vehicle(int id) {
         super(id);
@@ -83,7 +88,7 @@ public class Vehicle extends NodeWithRoutingTable {
         setBackgroundColor(Color.YELLOW);
         setFrontColor(Color.BLACK);
         //speedUnit = 1;
-        speed = 1;
+        speed = 1.0D;
         state = VehicleState.STOPPED;
         currentDirection = MOVING_DIRECTION.RIGHT;
         //runningTask = new RunningTask();
@@ -165,16 +170,21 @@ public class Vehicle extends NodeWithRoutingTable {
         //double currentAngle = 0;
         Edge edge = getCurrentContainingEdge();
         if (edge == null) return;
-        if (!(edge instanceof LineEdge)) return;
-        edge = (LineEdge) edge;
+//        if (!(edge instanceof LineEdge)) return;
+//        edge = (LineEdge) edge;
 
         if (state != VehicleState.RUNNING) {
-            currentMovingAngle = ((LineEdge) edge).getAngle();
+            //currentMovingAngle = ((LineEdge) edge).getAngle();
             setState(VehicleState.RUNNING);
         }
         //if (state == VehicleState.PAUSED || state == VehicleState.STOPPED) return;
 
         Point2D nextPoint = edge.nextStep(getX(), getY(), currentDirection, speed_unit);
+//        if (edge instanceof ArcEdge){
+//            System.out.println("Following arc edge (x,y) = " + getX()+", "+getY());
+//            System.out.println("   (xn,yn) = " + nextPoint.getX()+", "+nextPoint.getY());
+//
+//        }
         Node nextNode;
         if (currentDirection == MOVING_DIRECTION.RIGHT)
             nextNode = edge.getDest();
@@ -198,18 +208,19 @@ public class Vehicle extends NodeWithRoutingTable {
         //System.out.println("New node found " + newNode.getId());
 
         if (eList.size() == 0) return;
-        else if (eList.size() == 1) {//return to the old edge
-            //System.out.println("No new ways to go");
-            if (edge.getEdgeType() == EdgeType.UNDIRECTED) {
+        else if (eList.size() == 1) {
+//            System.out.println("Only one way left");
+            if (edge.getEdgeType() == EdgeType.UNDIRECTED) {//return to the old edge
                 //currentMovingAngle = Math.PI - currentMovingAngle;
                 if (currentDirection == MOVING_DIRECTION.RIGHT)
                     currentDirection = MOVING_DIRECTION.OPPOSITE;
                 else
                     currentDirection = MOVING_DIRECTION.RIGHT;
             } else {//Out of running edges, stop
-                setState(VehicleState.STOPPED);
-                if (timer2 != null)
-                    timer2.stop();
+                //setState(VehicleState.STOPPED);
+                setCurrentContainingEdge(eList.get(0));
+                if (nextNode == eList.get(0).getSource()) currentDirection = MOVING_DIRECTION.RIGHT;
+                else currentDirection = MOVING_DIRECTION.OPPOSITE;
             }
         } else {
             //System.out.println("Found " + (edgeList.size() - 1) + " another ways");
@@ -228,7 +239,7 @@ public class Vehicle extends NodeWithRoutingTable {
             } else {
                 setCurrentContainingEdge(newEdge);
 
-                double angle = ((LineEdge) newEdge).getAngle();
+                //double angle = ((LineEdge) newEdge).getAngle();
                 if (nextNode == newEdge.getSource()) {
                     //currentMovingAngle = angle;
                     currentDirection = MOVING_DIRECTION.RIGHT;
@@ -293,9 +304,91 @@ public class Vehicle extends NodeWithRoutingTable {
         return this;
     }
 
-    public enum VehicleState {STARTED, RUNNING, PAUSED, STOPPED}
+
 
     //update routing table from this topo
 
+    public void startCreatingRequests(){
+        if (requestFactory == null){
+            requestFactory = new RequestFactory();
+        }
+        requestFactory.startCreatingRequest(this);
+    }
 
+    public void stopCreatingRequests(){
+        if (requestFactory == null) return;
+        requestFactory.stopCreatingRequest();
+    }
+    public void sentRequest(){
+        if (requestFactory == null) return;
+        if (requestFactory.getContainer() == null){
+            requestFactory.setContainer(this);
+        }
+
+
+        if (requestFactory.getRequestList().size()==0) return;
+        if (getRtTable() == null) return;
+        int i = 0;
+        Request request = requestFactory.getRequestList().get(i);
+        Node dest;
+        if (getRtTable().getNearRSUList().size()>0){
+            Collection<Node> collection = getRtTable().getNearRSUList().values();
+            Node[] arr = new Node[getRtTable().getNearRSUList().size()];
+            collection.toArray(arr);
+            dest = arr[0];
+
+        }
+        else {
+            if (getRtTable().getNumberOfNearVehicles()>0){
+                Collection<Node> collection = getRtTable().getNearVehicleList().values();
+                Node[] arr = new Node[getRtTable().getNearVehicleList().size()];
+                collection.toArray(arr);
+                dest = arr[0];
+            }
+            else return;
+        }
+        request.setDest(dest);
+        Broker.sendRequest(request);
+        System.out.println("Request sent from " + getId() + " to " +dest.getId());
+        requestFactory.removeRequest(i);
+    }
+
+    //send a request in requestFactory
+    public void startSendingRequest(){
+        if (requestFactory == null) return;
+        if (requestFactory.getContainer() == null){
+            requestFactory.setContainer(this);
+        }
+        requestFactory.startSendingRequests();
+
+//        if (requestFactory.getRequestList().size()==0) return;
+//        if (getRtTable() == null) return;
+//        int i = 0;
+//        Request request = requestFactory.getRequestList().get(i);
+//        Node dest;
+//        if (getRtTable().getNearRSUList().size()>0){
+//            Collection<Node> collection = getRtTable().getNearRSUList().values();
+//            Node[] arr = new Node[getRtTable().getNearRSUList().size()];
+//            collection.toArray(arr);
+//            dest = arr[0];
+//
+//        }
+//        else {
+//            if (getRtTable().getNumberOfNearVehicles()>0){
+//                Collection<Node> collection = getRtTable().getNearVehicleList().values();
+//                Node[] arr = new Node[getRtTable().getNearVehicleList().size()];
+//                collection.toArray(arr);
+//                dest = arr[0];
+//            }
+//            else return;
+//        }
+//        request.setDest(dest);
+//        Broker.sendRequest(request);
+//        System.out.println("Request sent from " + getId() + " to " +dest.getId());
+//        requestFactory.removeRequest(i);
+    }
+    public void stopSendingRequests(){
+        if (requestFactory == null) return;
+        requestFactory.stopSendingRequests();
+    }
 }

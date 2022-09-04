@@ -29,5 +29,6 @@ public class NodeWithRoutingTable extends Node{
             rtTable.setContainer(this);
         }
         rtTable.updateRoutingTable(topo.getVehiclesList());
+        rtTable.updateRoutingTable(topo.getRSUList());
     }
 }

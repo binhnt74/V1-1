@@ -1,10 +1,13 @@
 package Graph;
 
+import Request.RequestFactory;
+
 import java.awt.*;
 
 public class RSUNode extends NodeWithRoutingTable{
     double width;
     double height;
+    RequestFactory requestFactory;
 
     public RSUNode(int id) {
         super(id);
@@ -44,6 +47,25 @@ public class RSUNode extends NodeWithRoutingTable{
             int vRange = (int)(getRtTable().getRange()/Graph.getScale());
             graphics.drawOval((int)getX()-vRange,(int)getY()-vRange, 2*vRange, 2*vRange);
         }
+
+    }
+
+    public void startCreatingRequests(){
+        if (requestFactory == null){
+            requestFactory = new RequestFactory();
+        }
+        requestFactory.startCreatingRequest(this);
+    }
+
+    public void stopCreatingRequests(){
+        if (requestFactory == null) return;
+        requestFactory.stopCreatingRequest();
+    }
+
+    public void startSendingRequest(){
+
+    }
+    public void stopSendingRequest(){
 
     }
 }

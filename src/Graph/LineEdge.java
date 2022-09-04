@@ -32,24 +32,7 @@ public class LineEdge extends Edge {
             double y1 = source.getY();
             double x2 =  dest.getX();
             double y2 =  dest.getY();
-//            double alfa = 0;
-//            if (x1 == x2) alfa = Math.PI / 2;
-//            else Math.atan((y2 - y1) / (x2 - x1));
-//            int x1a;
-//            if (x1 < x2) x1a = (int)source.RightPoint().getX();
-//            else x1a = (int)source.LeftPoint().getX();
-//
-//            int y1a;
-//            if (y1 < y2) y1a = (int)source.RightPoint().getY();
-//            else y1a = (int)source.LeftPoint().getY();
-//
-//            int x2a;
-//            if (x1 < x2) x2a = (int)dest.LeftPoint().getX();
-//            else x2a = (int)dest.RightPoint().getX();
-//
-//            int y2a;
-//            if (y1 < y2) y2a = (int)dest.LeftPoint().getY();
-//            else y2a = (int)dest.RightPoint().getY();
+
             graphics.setColor(backgroundColor);
             Stroke curStroke = graphics.getStroke();
             Stroke stroke = new BasicStroke((float)width);
@@ -110,13 +93,19 @@ public class LineEdge extends Edge {
         else c = -1;
         if (x1==x2){
             xn = x1;
-            yn += c*speed;
+            if (y1<=y2)
+                yn += c*speed;
+            else
+                yn -= c*speed;
             p.setLocation(xn, yn);
             return p;
         }
         if (y1 == y2){
             yn = y1;
-            xn += c*speed;
+            if (x1<=x2)
+                xn += c*speed;
+            else
+                xn -= c*speed;
             p.setLocation(xn, yn);
             return p;
         }

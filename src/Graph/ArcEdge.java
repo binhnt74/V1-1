@@ -4,18 +4,20 @@ import MyUtils.DrawingUtils;
 
 import java.awt.*;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Point2D;
+import Graph.Constants.MOVING_DIRECTION;
 
 public class ArcEdge extends Edge{
-    double angle; //in range from 0 to PI
+    double arcAngle; //in range from 0 to PI
     enum ARC_DIRECTION {CLOCK_WISE, ANTI_CLOCK_WISE}; //true: clock-wise
     ARC_DIRECTION direction;
 
-    public double getAngle() {
-        return angle;
+    public double getArcAngle() {
+        return arcAngle;
     }
 
-    public void setAngle(double angle) {
-        this.angle = angle;
+    public void setArcAngle(double arcAngle) {
+        this.arcAngle = arcAngle;
     }
 
     public ARC_DIRECTION getDirection() {
@@ -29,9 +31,55 @@ public class ArcEdge extends Edge{
     public ArcEdge(int id) {
         super(id);
         backgroundColor = Color.GREEN;
-        frontColor = Color.WHITE;
-        angle = Math.PI/4;
+        frontColor = Color.BLACK;
+        arcAngle = Math.PI/2;
         max_speed = 20;
+    }
+    //return radius of this arc
+    double getRadius(){
+        double radius = 0;
+        double x1 =  source.getX();
+        double y1 = source.getY();
+        double x2 =  dest.getX();
+        double y2 =  dest.getY();
+        //double xc = (x1+x2)/2, yc = (y1+y2)/2;
+
+        double d = Point2D.distance(x1,y1,x2,y2);
+        double delta = Math.PI/2;
+        double h = d/(2* Math.tan(delta/2));
+
+        double alfa = Math.PI - Math.atan(((y2-y1)/(x2-x1)));
+        double beta = Math.atan(-1D/Math.tan(alfa));
+
+        //double dy = h* Math.sin(beta);
+        //double dx = h* Math.cos(beta);
+        radius = h/Math.cos(delta/2);
+        return radius;
+    }
+
+    //return center point of this arc
+    Point2D getCenterPoint(){
+        Point2D p = new Point2D.Double(0D,0D);
+        double x1 =  source.getX();
+        double y1 = source.getY();
+        double x2 =  dest.getX();
+        double y2 =  dest.getY();
+        double xc = (x1+x2)/2, yc = (y1+y2)/2;
+
+        double d = Point2D.distance(x1,y1,x2,y2);
+        double delta = Math.PI/2;
+        double h = d/(2* Math.tan(delta/2));
+
+        double alfa = Math.PI - Math.atan(((y2-y1)/(x2-x1)));
+        double beta = Math.atan(-1D/Math.tan(alfa));
+
+        double dy = h* Math.sin(beta);
+        double dx = h* Math.cos(beta);
+        //double r = h/Math.cos(delta/2);
+
+        double x0 = xc - dx, y0 = yc+ dy;
+        p.setLocation(x0,y0);
+        return p;
     }
 
     @Override
@@ -43,37 +91,35 @@ public class ArcEdge extends Edge{
             double y1 = source.getY();
             double x2 =  dest.getX();
             double y2 =  dest.getY();
-//            double alfa = 0;
-//            if (x1 == x2) alfa = Math.PI / 2;
-//            else Math.atan((y2 - y1) / (x2 - x1));
-//            int x1a;
-//            if (x1 < x2) x1a = (int)source.RightPoint().getX();
-//            else x1a = (int)source.LeftPoint().getX();
-//
-//            int y1a;
-//            if (y1 < y2) y1a = (int)source.RightPoint().getY();
-//            else y1a = (int)source.LeftPoint().getY();
-//
-//            int x2a;
-//            if (x1 < x2) x2a = (int)dest.LeftPoint().getX();
-//            else x2a = (int)dest.RightPoint().getX();
-//
-//            int y2a;
-//            if (y1 < y2) y2a = (int)dest.LeftPoint().getY();
-//            else y2a = (int)dest.RightPoint().getY();
+            double xc = (x1+x2)/2, yc = (y1+y2)/2;
             graphics.setColor(backgroundColor);
             Stroke curStroke = graphics.getStroke();
-            Stroke stroke = new BasicStroke((float)max_speed);
+            Stroke stroke = new BasicStroke((float)max_speed/3);
             graphics.setStroke(stroke);
-            Arc2D arc2D = new Arc2D.Float(Arc2D.CHORD);
-            arc2D.setAngles(x1,y1,x2,y2);
-            graphics.draw(arc2D);
+            double d = Point2D.distance(x1,y1,x2,y2);
+            double delta = Math.PI/2;
+            double h = d/(2* Math.tan(delta/2));
+            //System.out.println("d = "+ d + ", h = " + h);
+
+            double alfa = Math.PI - Math.atan(((y2-y1)/(x2-x1)));
+            double beta = Math.atan(-1D/Math.tan(alfa));
+            //System.out.println("beta = " +beta);
+            double dy = h* Math.sin(beta);
+            double dx = h* Math.cos(beta);
+            double r = h/Math.cos(delta/2);
+
+            double x0 = xc - dx, y0 = yc+ dy;
+            //g2.setPaint(Color.RED);
+            //graphics.draw(new Rectangle2D.Double(x0-1, y0-1, 3, 3));
+            //g2.setPaint(Color.BLUE);
+            graphics.draw(new Arc2D.Double(x0-r, y0-r, 2*r, 2*r, 180*(beta-delta/2)/Math.PI, 180*delta/Math.PI, Arc2D.OPEN));
+
             Font font = graphics.getFont();
             int fsize = font.getSize();
             String st = String.valueOf(getId());
             graphics.setColor(frontColor);
             graphics.setStroke(curStroke);
-            graphics.drawString(st,((int)((x1+x2)/2) ) - fsize * st.length() / 4, ((int)((y1+y2)/2)) + fsize / 2);
+            graphics.drawString(st,((int)((x1+x2)/2 +(r-h)*Math.cos(delta/2)) ) - fsize * st.length() / 4, ((int)((y1+y2)/2 - (r-h)*Math.sin(delta/2))) + fsize / 2);
             if (getEdgeType() == EdgeType.DIRECTED){
                 Stroke directionStroke = new BasicStroke(2);
                 graphics.setStroke(directionStroke);
@@ -83,5 +129,51 @@ public class ArcEdge extends Edge{
             }
 
         }
+    }
+
+    //return next point from the current position, direction and speed
+    public Point2D nextStep(double curX, double curY, MOVING_DIRECTION curDirection, double speed){
+        Point2D p = new Point2D.Double(curX,curY);
+        double x1 = getSource().getX();
+        double y1 = getSource().getY();
+        double x2 = getDest().getX();
+        double y2 = getDest().getY();
+
+        double xc = (x1+x2)/2, yc = (y1+y2)/2;
+
+        double d = Point2D.distance(x1,y1,x2,y2);
+        double delta = Math.PI/2;
+        double h = d/(2* Math.tan(delta/2));
+
+        double alfa = Math.PI/2;
+        if (x2 != x1) alfa = Math.PI - Math.atan(((y2-y1)/(x2-x1)));
+
+        double beta = Math.atan(-1D/Math.tan(alfa));
+
+        double dy = h* Math.sin(beta);
+        double dx = h* Math.cos(beta);
+        //double r = h/Math.cos(delta/2);
+
+        double x0 = xc - dx, y0 = yc+ dy;   //center point (x0,y0)
+        double radius = h/Math.cos(delta/2);
+
+        //Point2D center = getCenterPoint();
+
+        //double xn = curX;
+        //double yn = curY;
+        int c = 1;
+        if (curDirection != Constants.MOVING_DIRECTION.RIGHT) c = -1;
+
+        //Point2D center = getCenterPoint();
+        //double radius = getRadius();
+
+        alfa = c*2*Math.asin(speed/2/radius);
+
+        double a = 0D;
+        if (x0!=curX) a = (Math.atan((y0 -curY )/(x0 -curX)) - alfa);
+        dy = radius/Math.sqrt(Math.tan(a)*Math.tan(a)+1);
+        dx = Math.tan(a)*dy;
+        p.setLocation(x0-dx*c, y0-dy*c);
+        return p;
     }
 }

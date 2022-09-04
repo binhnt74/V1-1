@@ -254,4 +254,149 @@ public class TopoFactory {
         return topo;
 
     }
+
+    public static Topo createHighwayTopo(){
+        int n = 4;
+        Graph graph = new Graph(2*n, 2*n+2);
+        Topo topo = new Topo();
+        topo.setGraph(graph);
+
+        int scale = 150;
+        graph.setScale(scale);
+
+        Node node;
+
+        node = graph.getNode(1);
+        node.setX(30);node.setY(30);
+
+        node = graph.getNode(2);
+        node.setX(30);node.setY(30+scale/3);
+
+        node = graph.getNode(3);
+        node.setX(30);node.setY(30+scale);
+
+        node = graph.getNode(4);
+        node.setX(30);node.setY(30+4*scale/3);
+
+        node = graph.getNode(5);
+        node.setX(30+3*scale);node.setY(30);
+
+        node = graph.getNode(6);
+        node.setX(30+3*scale);node.setY(30+scale/3);
+
+        node = graph.getNode(7);
+        node.setX(30+3*scale);node.setY(30+scale);
+
+        node = graph.getNode(8);
+        node.setX(30+3*scale);node.setY(30+4*scale/3);
+
+
+
+        Edge edge;
+        edge = graph.getEdge(1);
+        edge.setSource(graph.getNode(1));
+        edge.setDest(graph.getNode(5));
+        edge.setEdgeType(EdgeType.DIRECTED);
+
+        edge = graph.getEdge(2);
+        edge.setSource(graph.getNode(2));
+        edge.setDest(graph.getNode(6));
+        edge.setEdgeType(EdgeType.DIRECTED);
+
+        edge = graph.getEdge(3);
+        edge.setSource(graph.getNode(7));
+        edge.setDest(graph.getNode(3));
+        edge.setEdgeType(EdgeType.DIRECTED);
+
+        edge = graph.getEdge(4);
+        edge.setSource(graph.getNode(8));
+        edge.setDest(graph.getNode(4));
+        edge.setEdgeType(EdgeType.DIRECTED);
+
+        edge = graph.getEdge(5);
+        edge.setSource(graph.getNode(1));
+        edge.setDest(graph.getNode(2));
+
+        edge = graph.getEdge(6);
+        edge.setSource(graph.getNode(5));
+        edge.setDest(graph.getNode(6));
+
+        edge = graph.getEdge(7);
+        edge.setSource(graph.getNode(3));
+        edge.setDest(graph.getNode(4));
+
+        edge = graph.getEdge(8);
+        edge.setSource(graph.getNode(8));
+        edge.setDest(graph.getNode(7));
+
+        edge = graph.getEdge(9);
+        edge.setSource(graph.getNode(2));
+        edge.setDest(graph.getNode(3));
+
+        edge = graph.getEdge(10);
+        edge.setSource(graph.getNode(6));
+        edge.setDest(graph.getNode(7));
+
+        ArcEdge arcEdge = new ArcEdge(11);
+        arcEdge.setSource(graph.getNode(6));
+        arcEdge.setDest(graph.getNode(7));
+        graph.addEdge(arcEdge);
+
+        arcEdge = new ArcEdge(12);
+        arcEdge.setSource(graph.getNode(2));
+        arcEdge.setDest(graph.getNode(3));
+        graph.addEdge(arcEdge);
+
+        int k = 2;
+        RSUNode rsuNodes[] = new RSUNode[k];
+        rsuNodes[0] = new RSUNode(30);
+        rsuNodes[1] = new RSUNode(31);
+
+
+        rsuNodes[0].setX(30+3*scale/2);
+        rsuNodes[0].setY(30+scale/6);
+        rsuNodes[1].setX(30+3*scale/2);
+        rsuNodes[1].setY(30+7*scale/6);
+        //rsuNodes[1].putTo(graph.getNode(12));
+
+        for (int i = 0; i < k; i++) {
+            graph.addNode(rsuNodes[i]);
+        }
+
+        int N = 8;
+        Vehicle v[] = new Vehicle[N];
+
+        for (int i = 0; i < N; i++) {
+            v[i] = new Vehicle(200+i);
+            topo.addVehicle(v[i]);
+            graph.addNode(v[i]);
+            v[i].setRealSpeed(56);  //56m/s ~ 200km/h
+            //v[i].setId(200+i);
+        }
+        v[0].putTo(graph.getEdge(1),0.8);
+        v[0].setCurrentContainingEdge(graph.getEdge(1));
+
+        v[1].putTo(graph.getEdge(1),0.9);
+        v[1].setCurrentContainingEdge(graph.getEdge(1));
+
+        v[2].putTo(graph.getEdge(2),0.8);
+        v[2].setCurrentContainingEdge(graph.getEdge(2));
+
+        v[3].putTo(graph.getEdge(2),0.9);
+        v[3].setCurrentContainingEdge(graph.getEdge(2));
+
+        v[4].putTo(graph.getEdge(3),0.8);
+        v[4].setCurrentContainingEdge(graph.getEdge(3));
+
+        v[5].putTo(graph.getEdge(3),0.9);
+        v[5].setCurrentContainingEdge(graph.getEdge(3));
+
+        v[6].putTo(graph.getEdge(4),0.1);
+        v[6].setCurrentContainingEdge(graph.getEdge(4));
+
+        v[7].putTo(graph.getEdge(4),0.2);
+        v[7].setCurrentContainingEdge(graph.getEdge(4));
+
+        return topo;
+    }
 }

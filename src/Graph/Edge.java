@@ -39,6 +39,7 @@ public abstract class Edge {
         this.id = id;
         edgeType = EdgeType.UNDIRECTED;
         min_speed = 0;
+        max_speed = 28; //28m/s ~ 100km/h
     }
 
     public static Graphics2D getGraphics() {

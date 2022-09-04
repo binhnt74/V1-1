@@ -110,17 +110,26 @@ public class Topo {
         this.vehiclesList = vehiclesList;
     }
 
+    public List<Node> getRSUList() {
+        return RSUList;
+    }
+
+    public void setRSUList(List<Node> RSUList) {
+        this.RSUList = RSUList;
+    }
+
     public void stop(){
         stopAllVehicles();
         //topoPanel.stop();
     }
     public void startUpdatingRoutingTable(){
         if (routingTimer == null){
-            routingTimer = new Timer(50, e -> {
+            routingTimer = new Timer(Constants.UPD_RT_TIMESLOT, e -> {
                 for (Node node:vehiclesList){
                     Vehicle v = (Vehicle) node;
                     v.updateRoutingTable(this);
                 }
+                //System.out.println("RSUList size =" + RSUList.size());
                 for (Node node:RSUList){
                     RSUNode v = (RSUNode) node;
                     v.updateRoutingTable(this);
@@ -132,5 +141,39 @@ public class Topo {
     public void stopUpdatingRoutingTable(){
         if (routingTimer != null)
             routingTimer.stop();
+    }
+    public void startCreatingRequests(){
+        for (Node node:  vehiclesList){
+            Vehicle vehicle = (Vehicle) node;
+            vehicle.startCreatingRequests();
+        }
+        for (Node node:RSUList){
+            RSUNode rsuNode = (RSUNode) node;
+            rsuNode.startCreatingRequests();
+        }
+    }
+    public void stopCreatingRequests(){
+        for (Node node:  vehiclesList){
+            Vehicle vehicle = (Vehicle) node;
+            vehicle.stopCreatingRequests();
+        }
+        for (Node node:RSUList){
+            RSUNode rsuNode = (RSUNode) node;
+            rsuNode.stopCreatingRequests();
+        }
+    }
+    public void startSendingRequests(){
+        for (Node node:  vehiclesList){
+            Vehicle vehicle = (Vehicle) node;
+            vehicle.startSendingRequest();
+        }
+
+    }
+    public void stopSendingRequests(){
+
+        for (Node node:  vehiclesList){
+            Vehicle vehicle = (Vehicle) node;
+            vehicle.stopSendingRequests();
+        }
     }
 }
