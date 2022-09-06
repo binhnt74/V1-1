@@ -122,18 +122,27 @@ public class Topo {
         stopAllVehicles();
         //topoPanel.stop();
     }
+    public void updatingRoutingTableForVehicles(double range){
+        for (Node node:vehiclesList){
+            Vehicle v = (Vehicle) node;
+            v.updateRoutingTable(this);
+            v.getRtTable().setRange(range);
+        }
+    }
+
+    public void updatingRoutingTableForRSU(double range){
+        for (Node node:RSUList){
+            RSUNode v = (RSUNode) node;
+            v.updateRoutingTable(this);
+            v.getRtTable().setRange(range);
+        }
+    }
     public void startUpdatingRoutingTable(){
         if (routingTimer == null){
             routingTimer = new Timer(Constants.UPD_RT_TIMESLOT, e -> {
-                for (Node node:vehiclesList){
-                    Vehicle v = (Vehicle) node;
-                    v.updateRoutingTable(this);
-                }
+                updatingRoutingTableForVehicles(300);
                 //System.out.println("RSUList size =" + RSUList.size());
-                for (Node node:RSUList){
-                    RSUNode v = (RSUNode) node;
-                    v.updateRoutingTable(this);
-                }
+                updatingRoutingTableForRSU(1200);
             });
         }
         routingTimer.start();

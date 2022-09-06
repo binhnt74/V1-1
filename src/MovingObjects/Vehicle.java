@@ -1,5 +1,6 @@
 package MovingObjects;
 
+import Accesories.ImageProcessingKit;
 import Graph.*;
 
 import java.awt.geom.Point2D;
@@ -13,8 +14,6 @@ import Graph.Constants.MOVING_DIRECTION;
 import Request.Request;
 import Request.RequestFactory;
 import Request.Broker;
-import Routing.RoutingTable;
-import Topology.Topo;
 
 import java.util.Random;
 import javax.swing.Timer;
@@ -38,6 +37,18 @@ public class Vehicle extends NodeWithRoutingTable {
     List<Request> requestList;
     //Timer requestTimer; //timer for creating new requests
     RequestFactory requestFactory;
+    ImageProcessingKit kit;    //image processing kit
+
+    public ImageProcessingKit getKit() {
+        return kit;
+    }
+
+    public void setKit(ImageProcessingKit kit) {
+        if (kit == null){
+            kit = new ImageProcessingKit();
+        }
+        this.kit = kit;
+    }
 
     public Vehicle(int id) {
         super(id);
@@ -390,5 +401,8 @@ public class Vehicle extends NodeWithRoutingTable {
     public void stopSendingRequests(){
         if (requestFactory == null) return;
         requestFactory.stopSendingRequests();
+    }
+    public void setupImageProcessingKit(ImageProcessingKit newKit){
+        setKit(newKit);
     }
 }

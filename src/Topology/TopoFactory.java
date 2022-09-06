@@ -11,7 +11,7 @@ public class TopoFactory {
 
         int scale = 120;
         graph.setScale(scale);
-        //Init graph
+        //init graph
         Node node;
         node = graph.getNode(1);
         node.setX(1*scale);node.setY(2*scale);
@@ -86,7 +86,7 @@ public class TopoFactory {
         graph.setScale(scaleX);
         //graph.setScaleY(scaleY);
 
-        //Init graph
+        //init graph
         for (int i = 1; i <= n; i++) {
             Node node;
             for (int j = 1; j <= n; j++) {
@@ -237,15 +237,20 @@ public class TopoFactory {
 
         int k = 4;
         RSUNode rsuNodes[] = new RSUNode[k];
-        rsuNodes[0] = new RSUNode(300);
-        rsuNodes[1] = new RSUNode(301);
-        rsuNodes[2] = new RSUNode(302);
-        rsuNodes[3] = new RSUNode(303);
+        for (int i = 0; i < k; i++) {
+            rsuNodes[i] = new RSUNode(300+i);
+            //rsuNodes[i].getRtTable().setRange(rsuNodes[i].getRtTable().getRange()*2);
+        }
+//        rsuNodes[0] = new RSUNode(300);
+//        rsuNodes[1] = new RSUNode(301);
+//        rsuNodes[2] = new RSUNode(302);
+//        rsuNodes[3] = new RSUNode(303);
 
-        rsuNodes[0].putTo(graph.getNode(8));
-        rsuNodes[1].putTo(graph.getNode(12));
-        rsuNodes[2].putTo(graph.getNode(14));
-        rsuNodes[3].putTo(graph.getNode(18));
+        rsuNodes[0].putTo(graph.getNode(7));
+        rsuNodes[1].putTo(graph.getNode(9));
+        rsuNodes[2].putTo(graph.getNode(17));
+        rsuNodes[3].putTo(graph.getNode(19));
+
         for (int i = 0; i < k; i++) {
             graph.addNode(rsuNodes[i]);
         }

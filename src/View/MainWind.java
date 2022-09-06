@@ -109,8 +109,6 @@ public class MainWind extends JFrame {
             //repaint();
         });
 
-//        urbanRBut.doClick();
-//        urbanRBut.setSelected(true);
 
         highwayRBut.setActionCommand("Highway");
 
@@ -178,6 +176,10 @@ public class MainWind extends JFrame {
         setVisible(true);
         //graphPanel.run();
         runningState = false;
+
+        urbanRBut.doClick();
+        urbanRBut.setSelected(true);
+
         //topo.show();
         //System.out.println("Constructor done!");
 

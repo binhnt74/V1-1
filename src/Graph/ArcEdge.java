@@ -161,19 +161,24 @@ public class ArcEdge extends Edge{
 
         //double xn = curX;
         //double yn = curY;
-        int c = 1;
-        if (curDirection != Constants.MOVING_DIRECTION.RIGHT) c = -1;
+        int c1 = -1;
+        if (curDirection != Constants.MOVING_DIRECTION.RIGHT) c1 = 1;
 
         //Point2D center = getCenterPoint();
         //double radius = getRadius();
+        //double t = speed/2.0/radius;
+        alfa = c1*2*Math.asin(speed/2.0/radius);
+        double alfa1 = 0D;
+        if (x0!=curX)
+            alfa1 = Math.atan((y0 -curY )/(x0 -curX));
 
-        alfa = c*2*Math.asin(speed/2/radius);
-
-        double a = 0D;
-        if (x0!=curX) a = (Math.atan((y0 -curY )/(x0 -curX)) - alfa);
-        dy = radius/Math.sqrt(Math.tan(a)*Math.tan(a)+1);
-        dx = Math.tan(a)*dy;
-        p.setLocation(x0-dx*c, y0-dy*c);
+        double alfa2 = 0D;
+        alfa2 = alfa1 - alfa;
+        dx = radius/Math.sqrt(Math.tan(alfa2)*Math.tan(alfa2)+1);
+        dy = Math.tan(alfa2)*dx;
+//        int c2 = 1;
+//        if (alfa2<0) c2 = -1;
+        p.setLocation(x0+dx, y0+dy);
         return p;
     }
 }
