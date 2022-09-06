@@ -1,8 +1,12 @@
 package Graph;
 
+import MovingObjects.Vehicle;
+import PSO.*;
+import Request.Request;
 import Request.RequestFactory;
 
 import java.awt.*;
+import java.util.List;
 
 public class RSUNode extends NodeWithRoutingTable{
     double width;
@@ -67,5 +71,48 @@ public class RSUNode extends NodeWithRoutingTable{
     }
     public void stopSendingRequest(){
 
+    }
+    public void processRequest(Request request){
+        if (rtTable == null) return;
+        Swarm swarm = new Swarm();
+//        Particle[] p = new Particle[50];
+//        swarm.setParticles(p);
+
+        int dimension = rtTable.getNumberOfNearVehicles();
+        //List<Node> nearVehicleList = rtTable.getNearVehicleList().;
+
+        int N = 50; //number of particles
+        Particle[] p = new Portion[N];
+        for (int i = 0; i < N; i++) {
+            p[i] = new Portion(dimension);
+
+        }
+
+        swarm.setParticles(p);
+
+        swarm.InitSwampOfParticles(dimension,-0.1,0.1);
+        //swarm.printPosition();
+
+        LoadAllocation[] loadAllocation = new LoadAllocation[N];
+        for (int i = 0; i < N; i++) {
+            loadAllocation[i] = new LoadAllocation();
+            //loadAllocation[i].setNodeId(request.getDest().getId());
+            //
+            //loadAllocation[i].initRandom();
+        }
+        int i = 0;
+        for (Node node:rtTable.getNearVehicleList().values()){
+            loadAllocation[i].setWorkload(request.getWorkload());
+            Vehicle v = (Vehicle) node;
+            loadAllocation[i].setSpeed(((Vehicle) node).getKit().getProcessor().getSpeed());
+
+        }
+
+        FitnessFunctions.setLoadAllocation(loadAllocation);
+
+        //swarm.pso(100, FitnessFunctions.sphereFF);
+        double[] best_position = PSOGeneral.pso(50, swarm, FitnessFunctions.minMax);
+        System.out.println("Best position returned: ");
+        Particle.printArray(best_position);
     }
 }

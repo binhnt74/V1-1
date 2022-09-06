@@ -10,12 +10,13 @@ public class Request {
     int id;
     Node source;    //source of the request
     Node dest;      //destination of the request
-    double workload;
+    double workload;    //number of images to process
     Timestamp timestamp;
     RequestStatus status;
 
     public Request(){
         timestamp = Timestamp.from(Instant.now());
+        workload = 1000;
     }
 
     public int getId() {

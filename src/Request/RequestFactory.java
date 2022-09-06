@@ -120,7 +120,7 @@ public class RequestFactory {
                 if (requestList.size()<MAX){
                     Request request = createRandomRequest(node);
                     requestList.add(request);
-                    System.out.println("Request created by " + node.getId());
+                    //System.out.println("Request created by " + node.getId());
                 }
             });
         }
@@ -142,11 +142,11 @@ public class RequestFactory {
                     vehicle.sentRequest();
                     //System.out.println("Vehicle " + vehicle.getId() + " sends a request");
                 }
-                else if (container instanceof RSUNode){
-                    RSUNode rsu = (RSUNode) container;
-                    rsu.startSendingRequest();
-                    //System.out.println("RSU " + rsu.getId() + " sends a request");
-                }
+//                else if (container instanceof RSUNode){
+//                    RSUNode rsu = (RSUNode) container;
+//                    rsu.startSendingRequest();
+//                    //System.out.println("RSU " + rsu.getId() + " sends a request");
+//                }
                 else return;
 
             });

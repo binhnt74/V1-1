@@ -16,6 +16,12 @@ public class Broker {
         responseLists = new HashMap<>();
     }
 
+    //Check there is any new requests sent to the node having NodeID
+    public static boolean hasNewRequest(int nodeId){
+        if (requestLists.containsKey(nodeId)) return true;
+        else return false;
+    }
+
     //send the request to the broker
     //this request must have already a source and destination
     public static void sendRequest (Request request){

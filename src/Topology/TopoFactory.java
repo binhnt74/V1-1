@@ -1,5 +1,6 @@
 package Topology;
 
+import Accesories.ImageProcessingKit;
 import Graph.*;
 import MovingObjects.Vehicle;
 
@@ -189,6 +190,9 @@ public class TopoFactory {
         for (int i = 0; i < N; i++) {
             v[i] = new Vehicle(200+i);
             topo.addVehicle(v[i]);
+            ImageProcessingKit kit = new ImageProcessingKit();
+            v[i].setKit(kit);
+
             graph.addNode(v[i]);
             //v[i].setId(200+i);
         }
@@ -235,7 +239,7 @@ public class TopoFactory {
 //
 //        v[N-7].setRealSpeed(56);    //speed 56m/s ~ 200km/s
 
-        int k = 4;
+        int k = 1;
         RSUNode rsuNodes[] = new RSUNode[k];
         for (int i = 0; i < k; i++) {
             rsuNodes[i] = new RSUNode(300+i);
@@ -247,9 +251,9 @@ public class TopoFactory {
 //        rsuNodes[3] = new RSUNode(303);
 
         rsuNodes[0].putTo(graph.getNode(7));
-        rsuNodes[1].putTo(graph.getNode(9));
-        rsuNodes[2].putTo(graph.getNode(17));
-        rsuNodes[3].putTo(graph.getNode(19));
+//        rsuNodes[1].putTo(graph.getNode(9));
+//        rsuNodes[2].putTo(graph.getNode(17));
+//        rsuNodes[3].putTo(graph.getNode(19));
 
         for (int i = 0; i < k; i++) {
             graph.addNode(rsuNodes[i]);
@@ -374,6 +378,9 @@ public class TopoFactory {
         for (int i = 0; i < N; i++) {
             v[i] = new Vehicle(200+i);
             topo.addVehicle(v[i]);
+            ImageProcessingKit kit = new ImageProcessingKit();
+            v[i].setKit(kit);
+
             graph.addNode(v[i]);
             v[i].setRealSpeed(56);  //56m/s ~ 200km/h
             //v[i].setId(200+i);

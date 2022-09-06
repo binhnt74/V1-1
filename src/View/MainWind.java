@@ -13,6 +13,8 @@ public class MainWind extends JFrame {
     boolean routingState;
     boolean createRequestState;
     boolean sendingRequestState;
+    boolean processingRequestState;
+
     JPanel canvas;
 
     Topo topo;
@@ -135,6 +137,20 @@ public class MainWind extends JFrame {
         buttonGroup.add(urbanRBut);
         buttonGroup.add(highwayRBut);
 
+        JButton processRequestsBut = new JButton("Start processing requests");
+        processRequestsBut.addActionListener(e -> {
+            if (!processingRequestState){
+                topo.startProcessingRequests();
+                processRequestsBut.setText("Stop processing requests");
+                processingRequestState = true;
+            }
+            else {
+                topo.stopProcessingRequests();
+                processRequestsBut.setText("Start processing requests");
+                processingRequestState = false;
+            }
+        });
+
         buttonPanel.add(startStopBut);
         //buttonPanel.add(Box.createVerticalGlue());
         Component spaces[] = new Component[10];
@@ -153,7 +169,9 @@ public class MainWind extends JFrame {
         buttonPanel.add(sendingBut);
 
         buttonPanel.add(spaces[3]);
+        buttonPanel.add(processRequestsBut);
 
+        buttonPanel.add(spaces[4]);
         JButton exitBut = new JButton("Exit");
         exitBut.addActionListener(e -> {
             System.exit(0);

@@ -13,7 +13,7 @@ public class FitnessFunctions {
         return result;
     };
 
-    static Function<double[], Double> minMax = loads ->{
+    public static Function<double[], Double> minMax = loads ->{
         double result = 0;
         if (loadAllocation == null){
             loadAllocation = new LoadAllocation[loads.length];

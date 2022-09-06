@@ -2,6 +2,8 @@ package Topology;
 
 import Graph.*;
 import MovingObjects.Vehicle;
+import Request.Broker;
+import Request.Request;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ public class Topo {
     List<Node> RSUList;
     GraphDraw topoPanel;
     Timer routingTimer;     //timer for updating routing table
+    Timer processRequestTimer;  //timer for processing received requests
 
     public GraphDraw getTopoPanel() {
         return topoPanel;
@@ -184,5 +187,41 @@ public class Topo {
             Vehicle vehicle = (Vehicle) node;
             vehicle.stopSendingRequests();
         }
+    }
+
+    public void startProcessingRequests() {
+        if (processRequestTimer == null){
+            processRequestTimer = new Timer(Constants.PROCESS_REQUEST_TIMESLOT, e -> {
+                for (Node node:RSUList){
+                    RSUNode rsuNode = (RSUNode) node;
+                    if (Broker.hasNewRequest(node.getId())) {
+                        List<Request> requestList = Broker.receiveRequest(node);
+                        //System.out.println("RSU "+node.getId() +" received "+requestList.size()+" request(s)");
+                        for (Request request: requestList) processRequest(request);
+                    }
+                }
+            });
+        }
+        processRequestTimer.start();
+    }
+
+    private void processRequest(Request request) {
+        Node rsuNode = findRSUNode(request.getDest(), getRSUList());
+        if (rsuNode == null) return;
+        ((RSUNode)rsuNode).processRequest(request);
+    }
+
+    private Node findRSUNode(Node dest, List<Node> nodeList) {
+        if (nodeList == null) return null;
+        else {
+            for (Node node:nodeList)
+                if (dest == node) return node;
+        }
+        return null;
+    }
+
+    public void stopProcessingRequests() {
+        if (processRequestTimer !=null)
+            processRequestTimer.stop();
     }
 }
