@@ -3,6 +3,7 @@ package Routing;
 import Graph.Graph;
 import Graph.Node;
 import Graph.RSUNode;
+import Graph.NodeWithRoutingTable;
 import MovingObjects.Vehicle;
 
 import java.util.ArrayList;
@@ -31,7 +32,27 @@ public class RoutingTable {
     public void setNearVehicleList(HashMap<Integer, Node> nearVehicleList) {
         this.nearVehicleList = nearVehicleList;
     }
+    //check if two nodes are in range of each other
+    public static boolean isNear(NodeWithRoutingTable node1, NodeWithRoutingTable node2){
+        if (node1.getRtTable() == null || node2.getRtTable() == null) return false;
+        return (node1.getRtTable().isNear(node2)&& node2.getRtTable().isNear(node1));
+    }
 
+    //return near vehicle list of the vehicle with vehicleId
+    public List<Vehicle> getNearVehicleList(int vehicleId) {
+        if (nearVehicleList == null) return null;
+        if (!nearVehicleList.containsKey(vehicleId)) return null;
+        List<Vehicle> vehicleList = new ArrayList<>();
+        Node curNode = nearVehicleList.get(vehicleId);
+        if (! (curNode instanceof Vehicle)) return null;
+        Vehicle curVehicle = (Vehicle) curNode;
+        for (Node node :nearVehicleList.values())
+            if (node.getId()!=vehicleId && (node instanceof Vehicle)){
+                Vehicle otherVehicle = (Vehicle) node;
+                if (isNear(curVehicle, otherVehicle)) vehicleList.add(otherVehicle);
+            }
+        return vehicleList;
+    }
     public RoutingTable(){
         nearVehicleList = new HashMap<>();
         nearRSUList = new HashMap<>();

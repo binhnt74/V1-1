@@ -1,13 +1,16 @@
 package Accesories;
 
+import java.util.Random;
+
 //Image Processing Kit
 public class ImageProcessingKit {
+    public static Random rand = new Random();
     ImageProcessor processor;
     WifiTransceiver wifiHub;
 
     public ImageProcessingKit(){
-        processor = new ImageProcessor(100);
-        wifiHub = new WifiTransceiver(10);
+        processor = new ImageProcessor(30, 300);
+        wifiHub = new WifiTransceiver(300, 3000);
     }
 
     public ImageProcessor getProcessor() {

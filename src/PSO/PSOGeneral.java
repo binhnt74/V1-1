@@ -9,9 +9,7 @@ public class PSOGeneral {
     static double c1 = 1.49445; //cognitive (particle)
     static double c2 = 1.49445; //social (swarm)
     public static void arrayCopy(double [] source, double [] dest){
-        for (int i = 0; i < source.length; i++) {
-            dest[i] = source[i];
-        }
+        System.arraycopy(source, 0, dest, 0, source.length);
     }
 
     static public double[]  pso(int numberOfIteration, Swarm swarm, Function<double[], Double> fitnessFunc){
@@ -30,9 +28,9 @@ public class PSOGeneral {
             }
 
         }
-        System.out.println("Init best position:");
-        Particle.printArray(best_position);
-        System.out.println("Init best value: "+fitnessFunc.apply(best_position));
+//        System.out.println("Init best position:");
+//        Particle.printArray(best_position);
+//        System.out.println("Init best value: "+fitnessFunc.apply(best_position));
 
         for (int i = 0; i < numberOfIteration; i++) {
             int dim = swarm.particles[0].getDimension();
@@ -77,9 +75,9 @@ public class PSOGeneral {
                 }
 
             }
-            System.out.println("Best value so far : "+fitnessFunc.apply(best_position));
-            System.out.print("   best_position = ");
-            Particle.printArray(best_position);
+//            System.out.println("Best value so far : "+fitnessFunc.apply(best_position));
+//            System.out.print("   best_position = ");
+//            Particle.printArray(best_position);
 //
 //            for (int j = 0; j < dim-1; j++) {
 //                System.out.print(best_position[j] + ", ");

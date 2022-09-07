@@ -15,10 +15,10 @@ public class TopoFactory {
         //init graph
         Node node;
         node = graph.getNode(1);
-        node.setX(1*scale);node.setY(2*scale);
+        node.setX(scale);node.setY(2*scale);
 
         node = graph.getNode(2);
-        node.setX(1*scale);node.setY(3*scale);
+        node.setX(scale);node.setY(3*scale);
 
         node = graph.getNode(3);
         node.setX(2*scale);node.setY(2*scale);
@@ -28,14 +28,14 @@ public class TopoFactory {
         node.setX(2*scale);node.setY(3*scale);
 
         node = graph.getNode(5);
-        node.setX(2*scale);node.setY(1*scale);
+        node.setX(2*scale);node.setY(scale);
 
         node = graph.getNode(6);
-        node.setX(3*scale);node.setY(1*scale);
+        node.setX(3*scale);node.setY(scale);
 
         node = graph.getNode(7);
         node.zoom(2.0);
-        node.setX(4*scale);node.setY(1*scale);
+        node.setX(4*scale);node.setY(scale);
 
         node = graph.getNode(8);
         node.setX(4*scale);node.setY(2*scale);
@@ -185,7 +185,7 @@ public class TopoFactory {
 //        graph.addEdge(edge);
 
         int N = 10;
-        Vehicle v[] = new Vehicle[N];
+        Vehicle[] v = new Vehicle[N];
 
         for (int i = 0; i < N; i++) {
             v[i] = new Vehicle(200+i);
@@ -240,9 +240,10 @@ public class TopoFactory {
 //        v[N-7].setRealSpeed(56);    //speed 56m/s ~ 200km/s
 
         int k = 1;
-        RSUNode rsuNodes[] = new RSUNode[k];
+        RSUNode[] rsuNodes = new RSUNode[k];
         for (int i = 0; i < k; i++) {
             rsuNodes[i] = new RSUNode(300+i);
+            graph.addNode(rsuNodes[i]);
             //rsuNodes[i].getRtTable().setRange(rsuNodes[i].getRtTable().getRange()*2);
         }
 //        rsuNodes[0] = new RSUNode(300);
@@ -250,14 +251,10 @@ public class TopoFactory {
 //        rsuNodes[2] = new RSUNode(302);
 //        rsuNodes[3] = new RSUNode(303);
 
-        rsuNodes[0].putTo(graph.getNode(7));
+        rsuNodes[0].putTo(graph.getNode(13));
 //        rsuNodes[1].putTo(graph.getNode(9));
 //        rsuNodes[2].putTo(graph.getNode(17));
 //        rsuNodes[3].putTo(graph.getNode(19));
-
-        for (int i = 0; i < k; i++) {
-            graph.addNode(rsuNodes[i]);
-        }
 
         //topo.setGraph(graph);
         return topo;
@@ -274,32 +271,30 @@ public class TopoFactory {
         graph.setScale(scale);
 
         Node node;
-
+        double startX = 50, startY = 50;
         node = graph.getNode(1);
-        node.setX(30);node.setY(30);
+        node.setX(startX);node.setY(startY);
 
         node = graph.getNode(2);
-        node.setX(30);node.setY(30+scale/3);
+        node.setX(startX);node.setY(startY+scale/3D);
 
         node = graph.getNode(3);
-        node.setX(30);node.setY(30+scale);
+        node.setX(startX);node.setY(startY+scale);
 
         node = graph.getNode(4);
-        node.setX(30);node.setY(30+4*scale/3);
+        node.setX(startX);node.setY(startY+4*scale/3D);
 
         node = graph.getNode(5);
-        node.setX(30+3*scale);node.setY(30);
+        node.setX(startX+3*scale);node.setY(startY);
 
         node = graph.getNode(6);
-        node.setX(30+3*scale);node.setY(30+scale/3);
+        node.setX(startX+3*scale);node.setY(startY+scale/3D);
 
         node = graph.getNode(7);
-        node.setX(30+3*scale);node.setY(30+scale);
+        node.setX(startX+3*scale);node.setY(startY+scale);
 
         node = graph.getNode(8);
-        node.setX(30+3*scale);node.setY(30+4*scale/3);
-
-
+        node.setX(startX+3*scale);node.setY(startY+4*scale/3D);
 
         Edge edge;
         edge = graph.getEdge(1);
@@ -356,24 +351,25 @@ public class TopoFactory {
         arcEdge.setDest(graph.getNode(3));
         graph.addEdge(arcEdge);
 
-        int k = 2;
-        RSUNode rsuNodes[] = new RSUNode[k];
-        rsuNodes[0] = new RSUNode(30);
-        rsuNodes[1] = new RSUNode(31);
-
-
-        rsuNodes[0].setX(30+3*scale/2);
-        rsuNodes[0].setY(30+scale/6);
-        rsuNodes[1].setX(30+3*scale/2);
-        rsuNodes[1].setY(30+7*scale/6);
-        //rsuNodes[1].putTo(graph.getNode(12));
-
+        int k = 4;
+        RSUNode[] rsuNodes = new RSUNode[k];
         for (int i = 0; i < k; i++) {
+            rsuNodes[i] = new RSUNode(30+i);
             graph.addNode(rsuNodes[i]);
         }
 
+
+
+        rsuNodes[0].setX(30+3*scale/2D);
+        rsuNodes[0].setY(30+scale/6D);
+        rsuNodes[1].setX(30+3*scale/2D);
+        rsuNodes[1].setY(30+7*scale/6D);
+        rsuNodes[2].putTo(graph.getEdge(9),0.5);
+        rsuNodes[3].putTo(graph.getEdge(10),0.5);
+        //rsuNodes[1].putTo(graph.getNode(12));
+
         int N = 8;
-        Vehicle v[] = new Vehicle[N];
+        Vehicle[] v = new Vehicle[N];
 
         for (int i = 0; i < N; i++) {
             v[i] = new Vehicle(200+i);

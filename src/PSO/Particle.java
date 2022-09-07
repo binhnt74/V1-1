@@ -1,9 +1,12 @@
 package PSO;
 
+import MyUtils.Logging;
+
 import java.sql.Time;
 import java.util.Random;
 import java.util.Timer;
 import java.util.function.Function;
+import java.util.logging.Level;
 
 public class Particle {
     public static Random rand = new Random();
@@ -35,11 +38,17 @@ public class Particle {
     }
 
     public static void printArray(double[] arr){
-        System.out.print("(");
+//        Logging.logger.log(Level.INFO, "(");
+        StringBuilder st = new StringBuilder("(");
+        //System.out.print("(");
         for (int i = 0; i < arr.length-1; i++) {
-            System.out.print(arr[i]+",");
+            //Logging.logger.log(Level.INFO, arr[i]+",");
+            st.append(arr[i]).append(",");
+            //System.out.print(arr[i]+",");
         }
-        System.out.println(arr[arr.length-1] + ")");
+        st.append(arr[arr.length - 1]).append(")");
+//        Logging.logger.log(Level.INFO, st);
+        System.out.println(st);
     }
 
     public double[] getVelocity() {

@@ -6,6 +6,8 @@ import Request.Broker;
 import Request.Request;
 
 import javax.swing.*;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +18,15 @@ public class Topo {
     GraphDraw topoPanel;
     Timer routingTimer;     //timer for updating routing table
     Timer processRequestTimer;  //timer for processing received requests
+    int processingRequestTimeslot;  //in millisecond
+
+    public int getProcessingRequestTimeslot() {
+        return processingRequestTimeslot;
+    }
+
+    public void setProcessingRequestTimeslot(int processingRequestTimeslot) {
+        this.processingRequestTimeslot = processingRequestTimeslot;
+    }
 
     public GraphDraw getTopoPanel() {
         return topoPanel;
@@ -36,6 +47,7 @@ public class Topo {
     public Topo(){
         vehiclesList = new ArrayList<>();
         topoPanel = new GraphDraw();
+        processingRequestTimeslot = 1000;
     }
     public void addVehicle(Vehicle vehicle){
         if (vehicle != null){
@@ -143,9 +155,9 @@ public class Topo {
     public void startUpdatingRoutingTable(){
         if (routingTimer == null){
             routingTimer = new Timer(Constants.UPD_RT_TIMESLOT, e -> {
-                updatingRoutingTableForVehicles(300);
+                updatingRoutingTableForVehicles(500);
                 //System.out.println("RSUList size =" + RSUList.size());
-                updatingRoutingTableForRSU(1200);
+                updatingRoutingTableForRSU(1500);
             });
         }
         routingTimer.start();
@@ -159,20 +171,20 @@ public class Topo {
             Vehicle vehicle = (Vehicle) node;
             vehicle.startCreatingRequests();
         }
-        for (Node node:RSUList){
-            RSUNode rsuNode = (RSUNode) node;
-            rsuNode.startCreatingRequests();
-        }
+//        for (Node node:RSUList){
+//            RSUNode rsuNode = (RSUNode) node;
+//            rsuNode.startCreatingRequests();
+//        }
     }
     public void stopCreatingRequests(){
         for (Node node:  vehiclesList){
             Vehicle vehicle = (Vehicle) node;
             vehicle.stopCreatingRequests();
         }
-        for (Node node:RSUList){
-            RSUNode rsuNode = (RSUNode) node;
-            rsuNode.stopCreatingRequests();
-        }
+//        for (Node node:RSUList){
+//            RSUNode rsuNode = (RSUNode) node;
+//            rsuNode.stopCreatingRequests();
+//        }
     }
     public void startSendingRequests(){
         for (Node node:  vehiclesList){
@@ -191,13 +203,20 @@ public class Topo {
 
     public void startProcessingRequests() {
         if (processRequestTimer == null){
-            processRequestTimer = new Timer(Constants.PROCESS_REQUEST_TIMESLOT, e -> {
+            processRequestTimer = new Timer(processingRequestTimeslot, e -> {
                 for (Node node:RSUList){
                     RSUNode rsuNode = (RSUNode) node;
                     if (Broker.hasNewRequest(node.getId())) {
                         List<Request> requestList = Broker.receiveRequest(node);
-                        //System.out.println("RSU "+node.getId() +" received "+requestList.size()+" request(s)");
-                        for (Request request: requestList) processRequest(request);
+//                        System.out.println("RSU "+node.getId() +" received "+requestList.size()+" request(s)");
+                        for (Request request: requestList) {
+//                            Timestamp tBegin = Timestamp.from(Instant.now());
+                            rsuNode.processRequest(request);
+//                            Timestamp tEnd = Timestamp.from(Instant.now());
+//                            long period = tEnd.getTime()-tBegin.getTime();
+//                            System.out.println("Processed request from " + tBegin + " to "+ tEnd);
+//                            System.out.println("Time processed a request " + period);
+                        }
                     }
                 }
             });
@@ -205,11 +224,11 @@ public class Topo {
         processRequestTimer.start();
     }
 
-    private void processRequest(Request request) {
-        Node rsuNode = findRSUNode(request.getDest(), getRSUList());
-        if (rsuNode == null) return;
-        ((RSUNode)rsuNode).processRequest(request);
-    }
+//    private void processRequest(Request request) {
+//        Node rsuNode = findRSUNode(request.getDest(), getRSUList());
+//        if (rsuNode == null) return;
+//        ((RSUNode)rsuNode).processRequest(request);
+//    }
 
     private Node findRSUNode(Node dest, List<Node> nodeList) {
         if (nodeList == null) return null;

@@ -1,12 +1,17 @@
 package Graph;
 
 import MovingObjects.Vehicle;
+import MyUtils.Logging;
 import PSO.*;
 import Request.Request;
 import Request.RequestFactory;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 public class RSUNode extends NodeWithRoutingTable{
     double width;
@@ -41,7 +46,7 @@ public class RSUNode extends NodeWithRoutingTable{
 
         Font font = graphics.getFont();
         int fsize = font.getSize();
-        String st = "RSU " + String.valueOf(getId());
+        String st = "RSU " + getId();
         graphics.setColor(frontColor);
         graphics.drawString(st,((int)getX() ) - fsize * st.length() / 4, ((int)getY()) + fsize / 2);
 
@@ -73,12 +78,24 @@ public class RSUNode extends NodeWithRoutingTable{
 
     }
     public void processRequest(Request request){
+        System.out.println("Processing request from vehicle " + request.getSource().getId() +
+                " sent to " + request.getDest().getId() + " at " + request.getTimestamp());
+        System.out.println("Workload required " + request.getWorkload());
+
         if (rtTable == null) return;
+        //if (!(request.getSource() instanceof Vehicle)) return;
+
         Swarm swarm = new Swarm();
 //        Particle[] p = new Particle[50];
 //        swarm.setParticles(p);
 
-        int dimension = rtTable.getNumberOfNearVehicles();
+        List<Vehicle> vehicleList = rtTable.getNearVehicleList(request.getSource().getId());
+
+        if (vehicleList == null) vehicleList = new ArrayList<>();
+
+        vehicleList.add((Vehicle) request.getSource());
+
+        int dimension = vehicleList.size();
         //List<Node> nearVehicleList = rtTable.getNearVehicleList().;
 
         int N = 50; //number of particles
@@ -100,19 +117,43 @@ public class RSUNode extends NodeWithRoutingTable{
             //
             //loadAllocation[i].initRandom();
         }
-        int i = 0;
-        for (Node node:rtTable.getNearVehicleList().values()){
+
+
+
+        for (int i = 0; i< vehicleList.size(); i++ ){
             loadAllocation[i].setWorkload(request.getWorkload());
-            Vehicle v = (Vehicle) node;
-            loadAllocation[i].setSpeed(((Vehicle) node).getKit().getProcessor().getSpeed());
+            //Vehicle v = (Vehicle) node;
+            loadAllocation[i].setSpeed(vehicleList.get(i).getKit().getProcessor().getSpeed());
+            Vehicle source = (Vehicle)request.getSource();
+            //RSUNode dest = (RSUNode)request.getDest();
+            loadAllocation[i].setBandwidth(Math.min(vehicleList.get(i).getKit().getWifiHub().getBandwidth(), source.getKit().getWifiHub().getBandwidth()));
 
         }
+
+//        System.out.print("Near vehicle list: ");
+//        String st="";
+//        for (Vehicle v:vehicleList){
+//            st += v.getId() + " ";
+//        }
+//        System.out.println(st);
+//
+//        System.out.println("Allocation ");
+//        for (int i = 0;i<dimension;i++){
+//            System.out.println("BW: " +loadAllocation[i].getBandwidth() + ", SP: " + loadAllocation[i].getSpeed());
+//        }
 
         FitnessFunctions.setLoadAllocation(loadAllocation);
 
         //swarm.pso(100, FitnessFunctions.sphereFF);
-        double[] best_position = PSOGeneral.pso(50, swarm, FitnessFunctions.minMax);
+        double[] best_position = PSOGeneral.pso(40, swarm, FitnessFunctions.minMax);
+
+//        Logging.logger.log(Level.INFO, "Best position returned:");
         System.out.println("Best position returned: ");
-        Particle.printArray(best_position);
+        if (best_position != null) {
+            Particle.printArray(best_position);
+        }
+//        Logging.logger.log(Level.INFO, "Best value returned: "+FitnessFunctions.minMax.apply(best_position) + "(s)");
+        System.out.println("Best value returned: "+FitnessFunctions.minMax.apply(best_position) + "(s)\n");
+
     }
 }

@@ -51,7 +51,7 @@ public class RequestFactory {
 
     public RequestFactory(){
         requestList = new ArrayList<>();
-        creatingRequestTimeslot = 1000;
+        creatingRequestTimeslot = 5000;
         sendingRequestTimeslot = 1000;
         MAX = 5;
     }
@@ -79,7 +79,10 @@ public class RequestFactory {
     public static Request createRandomRequest(Node node){
         Request request;
         if (node instanceof RSUNode) request = new RSURequest();
-        else if (node instanceof Vehicle) request = new VehicleRequest();
+        else if (node instanceof Vehicle) {
+            request = new VehicleRequest();
+            ((VehicleRequest)request).setRandomLoad();
+        }
         else return null;
         request.setSource(node);
         return request;
@@ -147,7 +150,7 @@ public class RequestFactory {
 //                    rsu.startSendingRequest();
 //                    //System.out.println("RSU " + rsu.getId() + " sends a request");
 //                }
-                else return;
+
 
             });
         }
