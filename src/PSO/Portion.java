@@ -27,7 +27,6 @@ public class Portion extends Particle {
             bestParticlePosition[i] = position[i];
         }
 
-
     }
     @Override
     public void initVelocity(){

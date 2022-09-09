@@ -20,19 +20,19 @@ import javax.swing.Timer;
 //import java.util.TimerTask;
 
 public class Vehicle extends NodeWithRoutingTable {
-    public enum VehicleState {STARTED, RUNNING, PAUSED, STOPPED}
+    public enum VehicleState {RUNNING, STOPPED}
     VehicleState state;
     double speed_unit = 1.0D;  //set to 0 for speed 0
-    double speed;   //internal speed
-    double realSpeed;   //used to setup from user's point of view
+    double internalSpeed;   //internal speed
+    double realSpeed;   //used to setup from user's point of view, unit in metre/second
     double currentMovingAngle;
 
     MOVING_DIRECTION currentDirection;
-    double width = 20;
-    int height = 15;
+    double width ;  //in metre
+    double height;  //in metre
     Edge currentContainingEdge; //current edge that contains this node
     //Timer timer = null;
-    Timer timer2;   //timer for running vehicle
+    Timer runningVehicleTimer;   //timer for running vehicle
 
     List<Request> requestList;
     //Timer requestTimer; //timer for creating new requests
@@ -69,14 +69,14 @@ public class Vehicle extends NodeWithRoutingTable {
         this.currentDirection = currentDirection;
     }
 
-    public double getSpeed() {
-        return speed;
+    public double getInternalSpeed() {
+        return internalSpeed;
     }
 
-    public void setSpeed(double speed) {
-        this.speed = speed;
-        realSpeed = 1000 * Graph.getScale() * speed / Constants.TIMESLOT;
-        if (speed == 0) speed_unit = 0D;
+    public void setInternalSpeed(double internalSpeed) {
+        this.internalSpeed = internalSpeed;
+        realSpeed = 1000 * Graph.getScale() * internalSpeed / Constants.TIMESLOT;
+        if (internalSpeed == 0) speed_unit = 0D;
         else if (speed_unit == 0) speed_unit = 1D;
     }
 
@@ -88,18 +88,18 @@ public class Vehicle extends NodeWithRoutingTable {
     //unit metre/second
     public void setRealSpeed(double realSpeed) {
         this.realSpeed = realSpeed;
-        speed = Constants.TIMESLOT * realSpeed / 1000 / Graph.getScale();
-        if (speed == 0) speed_unit = 0D;
+        internalSpeed = Constants.TIMESLOT * realSpeed / 1000 / Graph.getScale();
+        if (internalSpeed == 0) speed_unit = 0D;
         else if (speed_unit == 0) speed_unit = 1D;
     }
 
     void commonInit() {
-        width = 20;
-        height = 15;
+        width = 2;
+        height = 3;
         setBackgroundColor(Color.YELLOW);
         setFrontColor(Color.BLACK);
         //speedUnit = 1;
-        speed = 1.0D;
+        internalSpeed = 1.0D;
         state = VehicleState.STOPPED;
         currentDirection = MOVING_DIRECTION.RIGHT;
         //runningTask = new RunningTask();
@@ -129,11 +129,11 @@ public class Vehicle extends NodeWithRoutingTable {
         this.width = width;
     }
 
-    public int getHeight() {
+    public double getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(double height) {
         this.height = height;
     }
 
@@ -146,16 +146,12 @@ public class Vehicle extends NodeWithRoutingTable {
     }
 
     public void run() {
-//        if (timer == null) timer = new Timer();
-//
-//        timer.schedule(runningTask, 1, ((int)(100/velocity)));
-
-        if (timer2 == null)
-            timer2 = new Timer((int) (Constants.TIMESLOT / speed), e -> {
+        if (runningVehicleTimer == null)
+            runningVehicleTimer = new Timer((int) (Constants.TIMESLOT / internalSpeed), e -> {
                 //revalidate();
                 runVehicle();
             });
-        timer2.start();
+        runningVehicleTimer.start();
     }
 
     Edge findAvailableEdge(Edge currentEdge, List<Edge> eList) {
@@ -163,16 +159,9 @@ public class Vehicle extends NodeWithRoutingTable {
         if (n == 0) return null;
         else if (n == 1) return eList.get(0);
         else {
-
-//                int i=0;
-//                while (i<n && ((LineEdge)eList.get(i)).getAngle() != -Math.PI/2) {
-//                    i++;
-//                }
-//                if (i<n) return eList.get(i);
-//                else {
             Random rand = new Random();
             return eList.get(rand.nextInt(n));
-//                }
+
         }
 
     }
@@ -270,7 +259,7 @@ public class Vehicle extends NodeWithRoutingTable {
     public void stop() {
 //        if (timer != null)
 //            timer.cancel();
-        timer2.stop();
+        runningVehicleTimer.stop();
         setState(VehicleState.STOPPED);
     }
 
@@ -284,20 +273,21 @@ public class Vehicle extends NodeWithRoutingTable {
 
     public void draw() {
         double m = Math.min(width, height) / 2;
-        graphics.setColor(getBackgroundColor());
-        graphics.fillOval((int) (getX() - m), (int) (getY() - m), (int) (m - 1), (int) (m - 1));
-        graphics.fillOval((int) getX() + 1, (int) (getY() - m), (int) (m - 1), (int) (m - 1));
-        graphics.fillOval((int) (getX() - m), (int) (getY() + 1), (int) (m - 1), (int) (m - 1));
-        graphics.fillOval((int) (getX() + 1), (int) (getY() + 1), (int) (m - 1), (int) (m - 1));
-        graphics.setColor(Color.RED);
-        graphics.fillOval((int) (getX() - 3), (int) (getY() - 3), 6, 6);
+//        graphics.setColor(getBackgroundColor());
+//        graphics.fillOval((int) (getX() - m), (int) (getY() - m), (int) (m - 1), (int) (m - 1));
+//        graphics.fillOval((int) getX() + 1, (int) (getY() - m), (int) (m - 1), (int) (m - 1));
+//        graphics.fillOval((int) (getX() - m), (int) (getY() + 1), (int) (m - 1), (int) (m - 1));
+//        graphics.fillOval((int) (getX() + 1), (int) (getY() + 1), (int) (m - 1), (int) (m - 1));
+//        graphics.setColor(Color.RED);
+//        graphics.fillOval((int) (getX() - 3), (int) (getY() - 3), 6, 6);
 
         Font font = graphics.getFont();
         int fsize = font.getSize();
         String st = String.valueOf(getId());
         graphics.setColor(getFrontColor());
         graphics.drawString(st, ((int) getX()) - fsize * st.length() / 4, ((int) getY()) + fsize / 2);
-        graphics.draw(new Rectangle2D.Double(getX() - width / 2, getY() - height / 2, width, height));
+//        graphics.draw(new Rectangle2D.Double(getX() - width / 2, getY() - height / 2, width, height));
+        graphics.fill(new Rectangle2D.Double(getX() - width, getY() - height, width*2, height*2));
 
         if (getRtTable()!=null){
             //System.out.println("Drawing range circle");
@@ -338,28 +328,32 @@ public class Vehicle extends NodeWithRoutingTable {
         if (requestFactory.getRequestList().size()==0) return;
         if (getRtTable() == null) return;
         int i = 0;
+        //Take the first request from the request list
         Request request = requestFactory.getRequestList().get(i);
         Node dest;
+        //Find near RSU node to send the request
         if (getRtTable().getNearRSUList().size()>0){
             Collection<Node> collection = getRtTable().getNearRSUList().values();
             Node[] arr = new Node[getRtTable().getNearRSUList().size()];
             collection.toArray(arr);
             dest = arr[0];
 
+            request.setDest(dest);
+            Broker.sendRequest(request);
+            //System.out.println("Request sent from " + getId() + " to " +dest.getId());
+            requestFactory.removeRequest(i);
         }
-        else {
-            if (getRtTable().getNumberOfNearVehicles()>0){
-                Collection<Node> collection = getRtTable().getNearVehicleList().values();
-                Node[] arr = new Node[getRtTable().getNearVehicleList().size()];
-                collection.toArray(arr);
-                dest = arr[0];
-            }
-            else return;
-        }
-        request.setDest(dest);
-        Broker.sendRequest(request);
-        //System.out.println("Request sent from " + getId() + " to " +dest.getId());
-        requestFactory.removeRequest(i);
+//        else return;
+//        {
+//            if (getRtTable().getNumberOfNearVehicles()>0){
+//                Collection<Node> collection = getRtTable().getNearVehicleList().values();
+//                Node[] arr = new Node[getRtTable().getNearVehicleList().size()];
+//                collection.toArray(arr);
+//                dest = arr[0];
+//            }
+//            else return;
+//        }
+
     }
 
     //send a request in requestFactory

@@ -14,6 +14,7 @@ public class MainWind extends JFrame {
     boolean createRequestState;
     boolean sendingRequestState;
     boolean processingRequestState;
+    boolean monitoringState;
 
     JPanel canvas;
 
@@ -151,6 +152,22 @@ public class MainWind extends JFrame {
             }
         });
 
+        JButton monitorBut = new JButton("Start monitoring requests");
+        monitorBut.addActionListener(e -> {
+            if (!monitoringState){
+                topo.startMonitoring();
+                monitoringState = true;
+                monitorBut.setText("Stop monitoring requests");
+            }
+            else
+            {
+                topo.stopMonitoring();
+                monitoringState = false;
+                monitorBut.setText("Start monitoring requests");
+            }
+
+        });
+
         buttonPanel.add(startStopBut);
         //buttonPanel.add(Box.createVerticalGlue());
         Component spaces[] = new Component[10];
@@ -172,6 +189,9 @@ public class MainWind extends JFrame {
         buttonPanel.add(processRequestsBut);
 
         buttonPanel.add(spaces[4]);
+        buttonPanel.add(monitorBut);
+
+        buttonPanel.add(spaces[5]);
         JButton exitBut = new JButton("Exit");
         exitBut.addActionListener(e -> {
             System.exit(0);

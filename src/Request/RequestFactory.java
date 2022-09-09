@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Timer;
 
+//This class is responsible for creating/sending requests
 public class RequestFactory {
     List<Request> requestList;
     int creatingRequestTimeslot;    //timeslot in millisecond for creating new request
@@ -64,18 +65,6 @@ public class RequestFactory {
         this.creatingRequestTimeslot = creatingRequestTimeslot;
     }
 
-//    public static Request createRandomRSURequest(Node node){
-//        Request request = new RSURequest();
-//        request.setSource(node);
-//        return request;
-//    }
-//
-//    public static Request createRandomVehicleRequest(Node node){
-//        Request request = new VehicleRequest();
-//        request.setSource(node);
-//        return request;
-//    }
-
     public static Request createRandomRequest(Node node){
         Request request;
         if (node instanceof RSUNode) request = new RSURequest();
@@ -93,30 +82,6 @@ public class RequestFactory {
         requestList.remove(index);
     }
 
-//    public void startCreatingRSURequest(Node node){
-//        if (timer == null){
-//            timer = new Timer(timeslot, e -> {
-//                if (requestList.size()<MAX){
-//                    Request request = createRandomRSURequest(node);
-//                    requestList.add(request);
-//                    System.out.println("RSU request created by " + node.getId());
-//                }
-//            });
-//        }
-//        timer.start();
-//    }
-//    public void startCreatingVehicleRequest(Node node){
-//        if (timer == null){
-//            timer = new Timer(timeslot, e -> {
-//                if (requestList.size()<MAX){
-//                    Request request = createRandomVehicleRequest(node);
-//                    requestList.add(request);
-//                    System.out.println("Vehicle request created by " + node.getId());
-//                }
-//            });
-//        }
-//        timer.start();
-//    }
     public void startCreatingRequest(Node node){
         if (creatingRequestTimer == null){
             creatingRequestTimer = new Timer(creatingRequestTimeslot, e -> {

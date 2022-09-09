@@ -9,8 +9,8 @@ public class ImageProcessingKit {
     WifiTransceiver wifiHub;
 
     public ImageProcessingKit(){
-        processor = new ImageProcessor(30, 300);
-        wifiHub = new WifiTransceiver(300, 3000);
+        processor = new ImageProcessor(30, 90);
+        wifiHub = new WifiTransceiver(300, 900);
     }
 
     public ImageProcessor getProcessor() {

@@ -2,6 +2,7 @@ package Topology;
 
 import Graph.*;
 import MovingObjects.Vehicle;
+import PSO.PSOResult;
 import Request.Broker;
 import Request.Request;
 
@@ -211,7 +212,12 @@ public class Topo {
 //                        System.out.println("RSU "+node.getId() +" received "+requestList.size()+" request(s)");
                         for (Request request: requestList) {
 //                            Timestamp tBegin = Timestamp.from(Instant.now());
-                            rsuNode.processRequest(request);
+                            PSOResult psoResult = rsuNode.processRequest(request);
+                            if (psoResult == null) {
+                                System.out.println("Problem when processing request " + request.getId());
+                                return;
+                            }
+                            rsuNode.allocateWorkLoad(psoResult);
 //                            Timestamp tEnd = Timestamp.from(Instant.now());
 //                            long period = tEnd.getTime()-tBegin.getTime();
 //                            System.out.println("Processed request from " + tBegin + " to "+ tEnd);
@@ -222,6 +228,9 @@ public class Topo {
             });
         }
         processRequestTimer.start();
+    }
+
+    private void allocateWorkLoad(PSOResult psoResult) {
     }
 
 //    private void processRequest(Request request) {
@@ -242,5 +251,18 @@ public class Topo {
     public void stopProcessingRequests() {
         if (processRequestTimer !=null)
             processRequestTimer.stop();
+    }
+
+    public void startMonitoring() {
+        for (Node rsu:RSUList) {
+            ((RSUNode) rsu).startMonitoringRequestProcessing();
+        }
+
+    }
+
+    public void stopMonitoring() {
+        for (Node rsu:RSUList) {
+            ((RSUNode) rsu).stopMonitoringRequestProcessing();
+        }
     }
 }

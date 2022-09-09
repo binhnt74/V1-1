@@ -7,7 +7,14 @@ import java.time.Instant;
 
 public class Request {
     enum RequestStatus {SENT, RECEIVED, REJECTED}
-    int id;
+    static long currentId = 0;
+
+    static long setNextId() {
+        currentId ++;
+        return currentId-1;
+    }
+
+    long id;
     Node source;    //source of the request
     Node dest;      //destination of the request
     double workload;    //number of images to process
@@ -15,17 +22,18 @@ public class Request {
     RequestStatus status;
 
     public Request(){
+        this.id = setNextId();
         timestamp = Timestamp.from(Instant.now());
         workload = 1000;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+//    public void setId(long id) {
+//        this.id = id;
+//    }
 
     public Node getSource() {
         return source;
